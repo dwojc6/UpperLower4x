@@ -82,10 +82,7 @@ struct OnboardingView: View {
         // Native Document Picker Sheet
         .sheet(isPresented: $showFileImporter) {
             DocumentPicker(onPick: { url in
-                // Close the sheet immediately
                 showFileImporter = false
-                
-                // Wait slightly for dismissal, then start background import
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     importBackup(from: url)
                 }
@@ -118,9 +115,7 @@ struct OnboardingView: View {
     }
     
     func importBackup(from url: URL) {
-        // Move file operations to background thread to prevent UI freeze/crash during transition
         DispatchQueue.global(qos: .userInitiated).async {
-            // 1. Access Security Scoped Resource
             let accessing = url.startAccessingSecurityScopedResource()
             defer {
                 if accessing {
@@ -131,13 +126,11 @@ struct OnboardingView: View {
             let coordinator = NSFileCoordinator()
             var fileError: NSError?
             
-            // 2. Coordinated Read (Blocking call, but now safely on background thread)
             coordinator.coordinate(readingItemAt: url, options: .withoutChanges, error: &fileError) { safeURL in
                 do {
                     let data = try Data(contentsOf: safeURL)
                     let backup = try JSONDecoder().decode(BackupData.self, from: data)
                     
-                    // 3. Jump back to Main Thread for UI Updates and Saving
                     DispatchQueue.main.async {
                         saveBackupData(backup)
                     }
@@ -191,7 +184,13 @@ struct OnboardingView: View {
         }
         UserDefaults.standard.set(backup.customExercises, forKey: "exercise_database_custom")
         
-        // 2. Update Stats
+        // 2. CRITICAL FIX: Update the Bindings!
+        // This ensures that when onSave() is called, it reads these values instead of empty strings
+        self.squat = String(Int(backup.squatMax))
+        self.bench = String(Int(backup.benchMax))
+        self.deadlift = String(Int(backup.deadliftMax))
+        
+        // Also save directly to UserDefaults just in case
         UserDefaults.standard.set(backup.squatMax, forKey: "squatMax")
         UserDefaults.standard.set(backup.benchMax, forKey: "benchMax")
         UserDefaults.standard.set(backup.deadliftMax, forKey: "deadliftMax")
@@ -200,7 +199,7 @@ struct OnboardingView: View {
         workoutManager.reloadAllData()
         database.reload()
         
-        // 4. Trigger the view transition
+        // 4. Trigger Transition
         UserDefaults.standard.set(true, forKey: "hasOnboarded")
         onSave()
     }
