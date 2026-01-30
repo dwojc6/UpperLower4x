@@ -24,10 +24,9 @@ struct ContentView: View {
     
     init() {
         let tabBarAppearance = UITabBarAppearance()
-        tabBarAppearance.configureWithOpaqueBackground()
-        tabBarAppearance.backgroundColor = .black
+        tabBarAppearance.configureWithDefaultBackground()
         tabBarAppearance.shadowColor = nil
-        
+
         UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
         UITabBar.appearance().standardAppearance = tabBarAppearance
     }
@@ -82,7 +81,6 @@ struct ContentView: View {
             .accentColor(.green)
             .environmentObject(workoutManager)
             .environmentObject(exerciseDatabase)
-            .preferredColorScheme(.dark)
         }
     }
     
@@ -104,6 +102,11 @@ struct HomeView: View {
     @EnvironmentObject var workoutManager: WorkoutManager
     
     @State private var showResetAlert = false
+    @State private var showGraduationAlert = false
+    
+    // Adaptive Metrics for Pinned Button
+    @ScaledMetric var buttonHeight: CGFloat = 50
+    @ScaledMetric var buttonBottomPadding: CGFloat = 20
     
     var days: [WorkoutDay] {
         ProgramData.shared.getDays(forWeek: workoutManager.currentWeek)
@@ -114,8 +117,8 @@ struct HomeView: View {
     }
     
     var body: some View {
-        ZStack {
-            Color.black.edgesIgnoringSafeArea(.all)
+        ZStack(alignment: .bottom) { // Align to bottom for pinned button
+            Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all)
             
             List {
                 // Header Section
@@ -134,11 +137,11 @@ struct HomeView: View {
                             VStack(alignment: .leading) {
                                 Text("CURRENT WEEK")
                                     .font(.headline)
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(.secondary)
                                 Text("Week \(workoutManager.currentWeek)")
                                     .font(.title3)
                                     .fontWeight(.bold)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.primary)
                             }
                             
                             Spacer()
@@ -177,7 +180,7 @@ struct HomeView: View {
                 }
                 .listRowSeparator(.hidden)
                 .listRowInsets(EdgeInsets())
-                .listRowBackground(Color.black)
+                .listRowBackground(Color(UIColor.systemBackground))
                 
                 // Workout Days List
                 ForEach(Array(days.enumerated()), id: \.element.id) { index, day in
@@ -199,7 +202,7 @@ struct HomeView: View {
                     }
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                    .listRowBackground(Color.black)
+                    .listRowBackground(Color(UIColor.systemBackground))
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button {
                             workoutManager.toggleDayCompletion(day: day)
@@ -209,9 +212,20 @@ struct HomeView: View {
                         .tint(.green)
                     }
                 }
+                
+                // Add extra padding at the bottom of the list so the button doesn't cover the last item
+                if workoutManager.currentWeek == 9 && workoutManager.isWeek9Complete {
+                    Color.clear.frame(height: buttonHeight + buttonBottomPadding)
+                        .listRowSeparator(.hidden)
+                }
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            
+            // Pinned Graduation Button
+            if workoutManager.currentWeek == 9 && workoutManager.isWeek9Complete {
+                pinnedGraduationButton
+            }
         }
         .navigationTitle("Upper Lower 4x")
         .navigationBarTitleDisplayMode(.large)
@@ -233,6 +247,56 @@ struct HomeView: View {
         } message: {
             Text("This will reset your schedule back to Week 1. Your completed workout history will remain saved.")
         }
+        .onChange(of: workoutManager.programFinished) { oldValue, newValue in
+            if newValue {
+                showGraduationAlert = true
+            }
+        }
+        .alert("Program Complete!", isPresented: $showGraduationAlert) {
+            Button("Increase Max & Restart", role: .none) {
+                squatMax += 10
+                deadliftMax += 10
+                benchMax += 5
+                workoutManager.resetProgram()
+            }
+            
+            Button("Restart (No Increase)", role: .none) {
+                workoutManager.resetProgram()
+            }
+            
+            Button("Cancel", role: .cancel) {
+                workoutManager.programFinished = false
+            }
+        } message: {
+            Text("You have finished Week 9!\n\nWould you like to increase your Squat/Deadlift by 10lbs and Bench by 5lbs, then restart at Week 1?")
+        }
+    }
+    
+    // MARK: - Pinned Button Component
+    var pinnedGraduationButton: some View {
+        VStack {
+            Button(action: {
+                withAnimation {
+                    showGraduationAlert = true
+                }
+            }) {
+                Text("Complete Program & Reset")
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: buttonHeight)
+                    .background(Color.green)
+                    .clipShape(Capsule())
+            }
+            .padding(.horizontal, 40)
+            .padding(.bottom, buttonBottomPadding)
+        }
+        .background(
+            LinearGradient(colors: [Color(UIColor.systemBackground).opacity(0), Color(UIColor.systemBackground)], startPoint: .top, endPoint: .bottom)
+                .frame(height: buttonHeight + buttonBottomPadding + 20)
+                .padding(.top, -20)
+        )
     }
 }
 
@@ -258,7 +322,7 @@ struct CurrentSessionTab: View {
             )
         } else {
             ZStack {
-                Color.black.edgesIgnoringSafeArea(.all)
+                Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all)
                 VStack(spacing: 20) {
                     Image(systemName: "dumbbell")
                         .font(.system(size: 60))
@@ -266,9 +330,9 @@ struct CurrentSessionTab: View {
                     Text("No Active Workout")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                     Text("Go to the Program tab to start a workout.")
-                        .foregroundColor(.gray)
+                        .foregroundColor(.secondary)
                 }
             }
         }
@@ -295,14 +359,14 @@ struct EditableStatBadge: View {
             VStack(spacing: 4) {
                 Text(title)
                     .font(.system(size: titleSize, weight: .bold))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.primary.opacity(0.6))
                     .tracking(1)
                 Text("\(Int(value))")
                     .font(.system(size: valueSize, weight: .heavy, design: .rounded))
                     .foregroundColor(.green)
                 Text("lbs")
                     .font(.system(size: labelSize, weight: .medium))
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundColor(.primary.opacity(0.4))
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
@@ -367,11 +431,11 @@ struct WorkoutDayCard: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(day.name.uppercased())
                         .font(.system(size: titleFontSize, weight: .heavy))
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                     
                     Text(isCompleted ? "Completed" : "\(day.exercises.count) Exercises")
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(.secondary)
                 }
                 
                 Spacer()
@@ -387,3 +451,4 @@ struct WorkoutDayCard: View {
         .opacity(isCompleted ? 0.5 : 1.0)
     }
 }
+
