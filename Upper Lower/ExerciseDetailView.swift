@@ -12,9 +12,10 @@ struct ExerciseDetailView: View {
     let initialExercise: Exercise
     let fullDayExercises: [Exercise]
     let userProfile: UserProfile
-    
+
     var isSessionView: Bool
     var historicalWorkout: CompletedWorkout? = nil
+    var onEditNote: ((Exercise) -> Void)? = nil
     
     @EnvironmentObject var workoutManager: WorkoutManager
     @EnvironmentObject var database: ExerciseDatabase
@@ -25,6 +26,7 @@ struct ExerciseDetailView: View {
     @State private var pendingWeightInput = ""
     @State private var pendingSetIndex: Int?
     @State private var pendingExercise: Exercise?
+    @State private var isWarmupExpanded = true
     
     // AMRAP States
     @State private var showAmrapInputAlert = false
@@ -47,7 +49,7 @@ struct ExerciseDetailView: View {
     
     var body: some View {
         ZStack(alignment: .bottom) {
-            Color.black.edgesIgnoringSafeArea(.all)
+            Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all)
             
             VStack {
                 // MARK: - HEADER SECTION
@@ -57,7 +59,7 @@ struct ExerciseDetailView: View {
                             Text(exercise.name.uppercased())
                                 .font(.title2)
                                 .fontWeight(.heavy)
-                                .foregroundColor(.white)
+                                .foregroundColor(.primary)
                                 .multilineTextAlignment(.leading)
                             
                             if !exercise.rpeOrNotes.isEmpty {
@@ -115,7 +117,8 @@ struct ExerciseDetailView: View {
                 ExerciseMenuButton(
                     exercises: exercises,
                     database: database,
-                    workoutManager: workoutManager
+                    workoutManager: workoutManager,
+                    onEditNote: onEditNote
                 )
             }
         }
@@ -169,54 +172,102 @@ struct ExerciseDetailView: View {
         let wSets = calculateWarmups(for: exercise)
         let completed = workoutManager.completedWarmups[exercise.id] ?? []
         
-        if !wSets.isEmpty && completed.count < wSets.count {
+        // CHANGED: Removed '&& completed.count < wSets.count' so the section stays visible
+        if !wSets.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
-                Text("WARM UP").font(.caption).fontWeight(.bold).foregroundColor(.orange).padding(.leading, 4)
-                ForEach(0..<wSets.count, id: \.self) { index in
-                    let w = wSets[index]
-                    let isCompleted = completed.contains(index)
-                    
+                // CHANGED: Header is now a tappable Button
+                Button {
+                    withAnimation {
+                        isWarmupExpanded.toggle()
+                    }
+                } label: {
                     HStack {
-                        Text("Warmup \(index + 1)").font(.subheadline).foregroundColor(.gray)
+                        Text("WARM UP")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(.orange)
+                        
                         Spacer()
                         
-                        VStack(spacing: 2) {
-                            Text("\(Int(w.weight)) lbs x \(w.reps)")
-                                .font(.headline) // CHANGED: match working sets size
-                                .foregroundColor(.white)
-                            
-                            if let plates = exercise.equipment.getPlateBreakdown(for: w.weight) {
-                                Text(plates)
-                                    .font(.caption2)
-                                    .foregroundColor(.orange)
-                            }
+                        // Show checkmark in header if all warmups are done
+                        if completed.count == wSets.count {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                                .font(.caption)
                         }
                         
-                        Spacer()
-                        Button(action: {
-                            if isSessionView {
-                                withAnimation {
-                                    if !workoutManager.isSessionActive {
-                                        workoutManager.startSession(day: day)
-                                    }
-                                    workoutManager.toggleWarmup(for: exercise.id, index: index)
+                        // Chevron indicator
+                        Image(systemName: "chevron.down")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                            .rotationEffect(isWarmupExpanded ? .zero : .degrees(-90))
+                    }
+                    .padding(.leading, 4)
+                }
+                .buttonStyle(.plain) // Prevents interference with list interactions
+                
+                // CHANGED: Only show rows if expanded
+                if isWarmupExpanded {
+                    ForEach(0..<wSets.count, id: \.self) { index in
+                        let w = wSets[index]
+                        let isCompleted = completed.contains(index)
+                        
+                        HStack {
+                            Text("Warmup \(index + 1)").font(.subheadline).foregroundColor(.gray)
+                            Spacer()
+                            
+                            VStack(spacing: 2) {
+                                Text("\(Int(w.weight)) lbs x \(w.reps)")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                                
+                                if let plates = exercise.equipment.getPlateBreakdown(for: w.weight) {
+                                    Text(plates)
+                                        .font(.caption2)
+                                        .foregroundColor(.orange)
                                 }
                             }
-                        }) {
-                            Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
-                                .font(.title2) // Scales with Dynamic Type
-                                .foregroundColor(isCompleted ? .orange : .gray)
+                            
+                            Spacer()
+                            Button(action: {
+                                if isSessionView {
+                                    withAnimation {
+                                        if !workoutManager.isSessionActive {
+                                            workoutManager.startSession(day: day)
+                                        }
+                                        workoutManager.toggleWarmup(for: exercise.id, index: index)
+                                    }
+                                }
+                            }) {
+                                Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
+                                    .font(.title2)
+                                    .foregroundColor(isCompleted ? .orange : .gray)
+                            }
+                            .disabled(!isSessionView)
                         }
-                        .disabled(!isSessionView)
+                        .padding(warmupPadding)
+                        .background(Color(UIColor.systemGray6).opacity(0.5))
+                        .cornerRadius(12)
+                        .opacity(isCompleted ? 0.6 : 1.0)
                     }
-                    .padding(warmupPadding) // ADAPTIVE PADDING
-                    .background(Color(UIColor.systemGray6).opacity(0.5))
-                    .cornerRadius(12) // Match ExerciseSetRow corner radius
-                    .opacity(isCompleted ? 0.6 : 1.0)
                 }
             }
             .padding(.horizontal)
             .transition(.opacity)
+            // CHANGED: Auto-collapse when all sets are completed
+            .onChange(of: completed) { oldValue, newValue in
+                if newValue.count == wSets.count {
+                    withAnimation {
+                        isWarmupExpanded = false
+                    }
+                }
+            }
+            // Ensure correct initial state when view loads
+            .onAppear {
+                if completed.count == wSets.count {
+                    isWarmupExpanded = false
+                }
+            }
         }
     }
     
@@ -416,3 +467,4 @@ struct ExerciseDetailView: View {
         }
     }
 }
+
