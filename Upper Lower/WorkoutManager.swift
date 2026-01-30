@@ -28,6 +28,7 @@ class WorkoutManager: ObservableObject {
     // Progression State
     @Published var currentWeek: Int = 1
     @Published var completedDaysByWeek: [Int: [String]] = [:]
+    @Published var programFinished: Bool = false
     
     // Schedule Modifications
     // KEYS are "Week-DayName"
@@ -35,6 +36,7 @@ class WorkoutManager: ObservableObject {
     @Published var removedDefaultExercises: [String: [String]] = [:]
     @Published var overriddenReps: [String: String] = [:]
     @Published var overriddenEquipment: [String: Equipment] = [:]
+    @Published var overriddenNotes: [String: String] = [:]
     
     // Exercise Order Persistence
     @Published var exerciseOrder: [String: [String]] = [:]
@@ -106,6 +108,11 @@ class WorkoutManager: ObservableObject {
         }
         
         return true
+    }
+    
+    var isWeek9Complete: Bool {
+        let daysCompleted = completedDaysByWeek[9]?.count ?? 0
+        return daysCompleted >= 4
     }
     
     func getHistory(for day: WorkoutDay) -> CompletedWorkout? {
@@ -266,15 +273,27 @@ class WorkoutManager: ObservableObject {
         overriddenEquipment[exerciseName] = equipment
         saveScheduleModifications()
     }
-    
+
     func getEquipment(for exerciseName: String, defaultEquipment: Equipment) -> Equipment {
         return overriddenEquipment[exerciseName] ?? defaultEquipment
+    }
+
+    func updateNotes(for exerciseName: String, notes: String) {
+        overriddenNotes[exerciseName] = notes
+        saveScheduleModifications()
+    }
+
+    func getNotes(for exerciseName: String, defaultNotes: String) -> String {
+        return overriddenNotes[exerciseName] ?? defaultNotes
     }
     
     func getEffectiveExercise(_ exercise: Exercise) -> Exercise {
         var modified = exercise
         if let newEq = overriddenEquipment[exercise.name] {
             modified.equipment = newEq
+        }
+        if let newNotes = overriddenNotes[exercise.name] {
+            modified.rpeOrNotes = newNotes
         }
         return modified
     }
@@ -537,6 +556,7 @@ class WorkoutManager: ObservableObject {
     func resetProgram() {
         currentWeek = 1
         completedDaysByWeek = [:]
+        programFinished = false
         saveProgression()
     }
     
@@ -559,7 +579,10 @@ class WorkoutManager: ObservableObject {
     
     private func checkWeekCompletion(week: Int) {
         if let days = completedDaysByWeek[week], days.count >= 4 {
-            if currentWeek == week {
+            // If Week 9 is done, trigger graduation instead of moving to week 10
+            if week == 9 {
+                programFinished = true
+            } else if currentWeek == week {
                 currentWeek += 1
                 saveProgression()
             }
@@ -619,6 +642,9 @@ class WorkoutManager: ObservableObject {
         if let encodedEq = try? JSONEncoder().encode(overriddenEquipment) {
             UserDefaults.standard.set(encodedEq, forKey: "overridden_equipment_schedule")
         }
+        if let encodedNotes = try? JSONEncoder().encode(overriddenNotes) {
+            UserDefaults.standard.set(encodedNotes, forKey: "overridden_notes_schedule")
+        }
     }
     
     private func loadScheduleModifications() {
@@ -635,8 +661,12 @@ class WorkoutManager: ObservableObject {
             overriddenReps = decodedReps
         }
         if let dataEq = UserDefaults.standard.data(forKey: "overridden_equipment_schedule"),
-           let decodedEq = try? JSONDecoder().decode([String: Equipment].self, from: dataEq) {
+            let decodedEq = try? JSONDecoder().decode([String: Equipment].self, from: dataEq) {
             overriddenEquipment = decodedEq
+        }
+        if let dataNotes = UserDefaults.standard.data(forKey: "overridden_notes_schedule"),
+            let decodedNotes = try? JSONDecoder().decode([String: String].self, from: dataNotes) {
+            overriddenNotes = decodedNotes
         }
     }
     
