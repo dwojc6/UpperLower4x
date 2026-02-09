@@ -9,10 +9,13 @@ import SwiftUI
 
 struct ExercisesView: View {
     @EnvironmentObject var database: ExerciseDatabase
+    @EnvironmentObject var workoutManager: WorkoutManager
     @State private var searchText = ""
     @State private var showAddAlert = false
     @State private var newExerciseName = ""
     @State private var newExerciseWeight = ""
+    @State private var showDeleteAlert = false
+    @State private var deleteTargetName: String?
     
     var filteredExercises: [String] {
         if searchText.isEmpty {
@@ -24,7 +27,7 @@ struct ExercisesView: View {
     
     var body: some View {
         ZStack {
-            Color.black.edgesIgnoringSafeArea(.all)
+            Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all)
                 .onTapGesture {
                     UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                 }
@@ -48,6 +51,14 @@ struct ExercisesView: View {
                     LazyVStack(spacing: 0) {
                         ForEach(filteredExercises, id: \.self) { name in
                             ExerciseDatabaseRow(name: name)
+                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                    Button(role: .destructive) {
+                                        deleteTargetName = name
+                                        showDeleteAlert = true
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
+                                }
                         }
                     }
                     .padding(.bottom, 20)
@@ -58,7 +69,7 @@ struct ExercisesView: View {
             }
         }
         .navigationTitle("Exercises")
-        .background(Color.black)
+        .background(Color(UIColor.systemBackground))
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
@@ -87,6 +98,25 @@ struct ExercisesView: View {
         } message: {
             Text("Create a new exercise to track.")
         }
+        .alert("Delete Exercise?", isPresented: $showDeleteAlert) {
+            Button("Delete", role: .destructive) {
+                if let name = deleteTargetName {
+                    if database.customExercises.contains(name) {
+                        database.removeCustomExercise(name: name)
+                    } else {
+                        database.hideExercise(name: name)
+                    }
+                    database.clearWeight(for: name)
+                    workoutManager.clearOverrides(for: name)
+                }
+                deleteTargetName = nil
+            }
+            Button("Cancel", role: .cancel) {
+                deleteTargetName = nil
+            }
+        } message: {
+            Text("This will remove the custom exercise from your list.")
+        }
     }
 }
 
@@ -105,15 +135,17 @@ struct ExerciseDatabaseRow: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(name)
-                        .font(.headline)
-                        .foregroundColor(.white)
-                    
-                    Text(savedWeight != nil ? "Set: \(Int(savedWeight!)) lbs" : "Not set")
-                        .font(.caption)
-                        .foregroundColor(savedWeight != nil ? .green : .gray)
+                NavigationLink(destination: ExerciseSettingsView(name: name)) {
+                    HStack(spacing: 6) {
+                        Text(name)
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
                 }
+                .buttonStyle(.plain)
                 
                 Spacer()
                 
@@ -122,7 +154,7 @@ struct ExerciseDatabaseRow: View {
                     TextField("0", text: $weightInput)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                         .frame(width: inputWidth)
                         .focused($isFocused)
                         .onChange(of: isFocused) {
@@ -139,18 +171,26 @@ struct ExerciseDatabaseRow: View {
                         .foregroundColor(.gray)
                 }
                 .padding(8)
-                .background(Color.white.opacity(0.1))
+                .background(Color.primary.opacity(0.1))
                 .cornerRadius(8)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             
             Divider()
-                .background(Color.gray.opacity(0.3))
+                .background(Color.secondary.opacity(0.3))
         }
         .onAppear {
             if let weight = savedWeight {
-                weightInput = "\(Int(weight))"
+                // CHANGED: Use .formattedWeight so "12.5" doesn't become "12" in the text box
+                weightInput = weight.formattedWeight
+            }
+        }
+        .onChange(of: savedWeight) { _, newValue in
+            if let weight = newValue {
+                weightInput = weight.formattedWeight
+            } else {
+                weightInput = ""
             }
         }
     }
@@ -162,3 +202,103 @@ struct ExerciseDatabaseRow: View {
     }
 }
 
+struct ExerciseSettingsView: View {
+    let name: String
+    
+    @EnvironmentObject var database: ExerciseDatabase
+    @EnvironmentObject var workoutManager: WorkoutManager
+    
+    @State private var selectedEquipment: Equipment = .machine
+    @State private var barbellBaseWeight: Double = 45
+    @State private var showWeightAlert = false
+    @State private var weightInput = ""
+    
+    var defaultEquipment: Equipment {
+        for week in 1...9 {
+            let days = ProgramData.shared.getDays(forWeek: week)
+            if let match = days.flatMap({ $0.exercises }).first(where: { $0.name == name }) {
+                return match.equipment
+            }
+        }
+        return .machine
+    }
+    
+    var currentEquipment: Equipment {
+        workoutManager.getEquipment(for: name, defaultEquipment: defaultEquipment)
+    }
+    
+    var currentWeight: Double? {
+        database.getWeight(for: name)
+    }
+    
+    var body: some View {
+        Form {
+            Section(header: Text("Equipment")) {
+                Picker("Type", selection: $selectedEquipment) {
+                    ForEach(Equipment.allCases, id: \.self) { equipment in
+                        Text(equipment.rawValue).tag(equipment)
+                    }
+                }
+                .pickerStyle(.menu)
+            }
+            
+            Section(header: Text("Weight")) {
+                HStack {
+                    Text("Current")
+                    Spacer()
+                    Text(currentWeight?.formattedWeight ?? "-")
+                        .foregroundColor(.secondary)
+                }
+                
+                Button("Change Weight") {
+                    weightInput = currentWeight?.formattedWeight ?? ""
+                    showWeightAlert = true
+                }
+                
+                if currentWeight != nil {
+                    Button("Clear Saved Weight", role: .destructive) {
+                        database.clearWeight(for: name)
+                    }
+                }
+            }
+            
+            if selectedEquipment == .barbell {
+                Section(header: Text("Barbell Weight")) {
+                    Picker("Barbell", selection: $barbellBaseWeight) {
+                        Text("45 lbs (Standard)").tag(45.0)
+                        Text("25 lbs (Preacher)").tag(25.0)
+                        Text("15 lbs (Smith)").tag(15.0)
+                    }
+                    .pickerStyle(.menu)
+                }
+            }
+        }
+        .navigationTitle(name)
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            selectedEquipment = currentEquipment
+            barbellBaseWeight = workoutManager.getBarbellBaseWeight(for: name, defaultWeight: Equipment.barbell.baseWeight)
+        }
+        .onChange(of: selectedEquipment) { _, newValue in
+            workoutManager.updateEquipment(for: name, to: newValue)
+            if newValue == .barbell {
+                barbellBaseWeight = workoutManager.getBarbellBaseWeight(for: name, defaultWeight: Equipment.barbell.baseWeight)
+            }
+        }
+        .onChange(of: barbellBaseWeight) { _, newValue in
+            workoutManager.updateBarbellBaseWeight(for: name, to: newValue)
+        }
+        .alert("Set Weight", isPresented: $showWeightAlert) {
+            TextField("Weight", text: $weightInput)
+                .keyboardType(.decimalPad)
+            Button("Save") {
+                if let value = Double(weightInput) {
+                    database.saveWeight(for: name, weight: value)
+                }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Enter the weight for this exercise.")
+        }
+    }
+}

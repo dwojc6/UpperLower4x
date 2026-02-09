@@ -37,6 +37,7 @@ class WorkoutManager: ObservableObject {
     @Published var overriddenReps: [String: String] = [:]
     @Published var overriddenEquipment: [String: Equipment] = [:]
     @Published var overriddenNotes: [String: String] = [:]
+    @Published var overriddenBarbellWeights: [String: Double] = [:]
     
     // Exercise Order Persistence
     @Published var exerciseOrder: [String: [String]] = [:]
@@ -277,6 +278,25 @@ class WorkoutManager: ObservableObject {
 
     func getEquipment(for exerciseName: String, defaultEquipment: Equipment) -> Equipment {
         return overriddenEquipment[exerciseName] ?? defaultEquipment
+    }
+
+    func updateBarbellBaseWeight(for exerciseName: String, to weight: Double) {
+        overriddenBarbellWeights[exerciseName] = weight
+        saveScheduleModifications()
+    }
+
+    func getBarbellBaseWeight(for exerciseName: String, defaultWeight: Double) -> Double {
+        return overriddenBarbellWeights[exerciseName] ?? defaultWeight
+    }
+
+    func clearOverrides(for exerciseName: String) {
+        let didRemove = overriddenReps.removeValue(forKey: exerciseName) != nil
+        let didRemoveEq = overriddenEquipment.removeValue(forKey: exerciseName) != nil
+        let didRemoveNotes = overriddenNotes.removeValue(forKey: exerciseName) != nil
+        let didRemoveBarbell = overriddenBarbellWeights.removeValue(forKey: exerciseName) != nil
+        if didRemove || didRemoveEq || didRemoveNotes || didRemoveBarbell {
+            saveScheduleModifications()
+        }
     }
 
     func updateNotes(for exerciseName: String, notes: String) {
@@ -646,6 +666,9 @@ class WorkoutManager: ObservableObject {
         if let encodedNotes = try? JSONEncoder().encode(overriddenNotes) {
             UserDefaults.standard.set(encodedNotes, forKey: "overridden_notes_schedule")
         }
+        if let encodedBarbell = try? JSONEncoder().encode(overriddenBarbellWeights) {
+            UserDefaults.standard.set(encodedBarbell, forKey: "overridden_barbell_weights")
+        }
     }
     
     private func loadScheduleModifications() {
@@ -668,6 +691,10 @@ class WorkoutManager: ObservableObject {
         if let dataNotes = UserDefaults.standard.data(forKey: "overridden_notes_schedule"),
             let decodedNotes = try? JSONDecoder().decode([String: String].self, from: dataNotes) {
             overriddenNotes = decodedNotes
+        }
+        if let dataBarbell = UserDefaults.standard.data(forKey: "overridden_barbell_weights"),
+            let decodedBarbell = try? JSONDecoder().decode([String: Double].self, from: dataBarbell) {
+            overriddenBarbellWeights = decodedBarbell
         }
     }
     

@@ -62,6 +62,12 @@ struct ExerciseDetailView: View {
                                 .foregroundColor(.primary)
                                 .multilineTextAlignment(.leading)
                             
+                            Text(exercise.equipment.rawValue.uppercased())
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.secondary)
+                                .tracking(0.8)
+                            
                             if !exercise.rpeOrNotes.isEmpty {
                                 Text(exercise.rpeOrNotes)
                                     .font(.subheadline)
@@ -118,6 +124,7 @@ struct ExerciseDetailView: View {
                     exercises: exercises,
                     database: database,
                     workoutManager: workoutManager,
+                    barbellBaseWeights: workoutManager.overriddenBarbellWeights,
                     onEditNote: onEditNote
                 )
             }
@@ -221,7 +228,8 @@ struct ExerciseDetailView: View {
                                     .font(.headline)
                                     .foregroundColor(.primary)
                                 
-                                if let plates = exercise.equipment.getPlateBreakdown(for: w.weight) {
+                                let baseOverride = workoutManager.getBarbellBaseWeight(for: exercise.name, defaultWeight: exercise.equipment.baseWeight)
+                                if let plates = exercise.equipment.getPlateBreakdown(for: w.weight, baseWeightOverride: baseOverride) {
                                     Text(plates)
                                         .font(.caption2)
                                         .foregroundColor(.orange)
@@ -303,14 +311,14 @@ struct ExerciseDetailView: View {
     }
     
     func roundWeight(_ weight: Double) -> Double {
-        return (weight / 5.0).rounded(.down) * 5.0
+        return (weight / 5.0).rounded(.toNearestOrAwayFromZero) * 5.0
     }
     
     // MARK: - Updated Warmup Logic
     func calculateWarmups(for exercise: Exercise) -> [(weight: Double, reps: Int)] {
         guard [.squat, .bench, .deadlift].contains(exercise.liftType) else { return [] }
         let w = getWeight(for: exercise)
-        let bar = exercise.equipment.baseWeight
+        let bar = workoutManager.getBarbellBaseWeight(for: exercise.name, defaultWeight: exercise.equipment.baseWeight)
         
         // 1. 10 reps x Empty Bar
         let s1 = (bar, 10)
@@ -467,4 +475,3 @@ struct ExerciseDetailView: View {
         }
     }
 }
-

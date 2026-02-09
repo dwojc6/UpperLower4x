@@ -16,6 +16,8 @@ struct ExerciseSetRow: View {
     var showExerciseName: Bool = false
     let isSessionView: Bool
     let onTap: () -> Void
+
+    @EnvironmentObject var workoutManager: WorkoutManager
     
     // MARK: - Adaptive Metrics
     @ScaledMetric var circleSize: CGFloat = 40
@@ -43,10 +45,11 @@ struct ExerciseSetRow: View {
                 HStack(alignment: .bottom, spacing: 2) {
                     // Hide weight display for bodyweight
                     if exercise.equipment != .bodyweight {
-                        Text("\(Int(weight))")
-                            .font(.headline)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
+                        // CHANGED: Removed Int() casting
+                         Text(weight.formattedWeight)
+                             .font(.headline)
+                             .fontWeight(.bold)
+                             .foregroundColor(.primary)
                         Text("lbs")
                             .font(.caption)
                             .foregroundColor(.gray)
@@ -57,10 +60,10 @@ struct ExerciseSetRow: View {
                             .padding(.bottom, 1)
                     }
                     
-                    Text(reps)
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
+                     Text(reps)
+                         .font(.headline)
+                         .fontWeight(.bold)
+                         .foregroundColor(.primary)
                     
                     if reps.contains(":") {
                         Text("seconds")
@@ -75,7 +78,8 @@ struct ExerciseSetRow: View {
                     }
                 }
                 
-                if let plates = exercise.equipment.getPlateBreakdown(for: weight) {
+                let baseOverride = workoutManager.getBarbellBaseWeight(for: exercise.name, defaultWeight: exercise.equipment.baseWeight)
+                if let plates = exercise.equipment.getPlateBreakdown(for: weight, baseWeightOverride: baseOverride) {
                     HStack(spacing: 4) {
                         Image(systemName: "circle.circle")
                         Text(plates)

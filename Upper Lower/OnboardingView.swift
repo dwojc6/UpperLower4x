@@ -26,19 +26,19 @@ struct OnboardingView: View {
     
     var body: some View {
         ZStack {
-            Color.black.edgesIgnoringSafeArea(.all)
+            Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all)
             
             ScrollView {
                 VStack(spacing: 20) {
                     Text("SETUP PROGRAM")
                         .font(.largeTitle)
                         .fontWeight(.heavy)
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                         .padding(.top, 60)
                         .padding(.bottom, 40)
                     
                     Text("Enter your 1 Rep Max (Lbs)")
-                        .foregroundColor(.gray)
+                        .foregroundColor(.secondary)
                     
                     VStack(spacing: 15) {
                         inputField(title: "Squat", text: $squat)
@@ -65,7 +65,7 @@ struct OnboardingView: View {
                         Text("Import Backup")
                             .font(.subheadline)
                             .fontWeight(.medium)
-                            .foregroundColor(.gray)
+                            .foregroundColor(.secondary)
                             .padding()
                     }
                     .padding(.top, 10)
@@ -78,7 +78,6 @@ struct OnboardingView: View {
                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
             }
         }
-        .preferredColorScheme(.dark)
         // Native Document Picker Sheet
         .sheet(isPresented: $showFileImporter) {
             DocumentPicker(onPick: { url in
@@ -110,7 +109,7 @@ struct OnboardingView: View {
                 .padding()
                 .background(Color(UIColor.systemGray6))
                 .cornerRadius(8)
-                .foregroundColor(.white)
+                .foregroundColor(.primary)
         }
     }
     
@@ -184,10 +183,14 @@ struct OnboardingView: View {
         if let encodedEq = try? JSONEncoder().encode(backup.overriddenEquipment) {
             UserDefaults.standard.set(encodedEq, forKey: "overridden_equipment_schedule")
         }
+        if let encodedBarbell = try? JSONEncoder().encode(backup.overriddenBarbellWeights) {
+            UserDefaults.standard.set(encodedBarbell, forKey: "overridden_barbell_weights")
+        }
         if let encodedWeights = try? JSONEncoder().encode(backup.savedWeights) {
             UserDefaults.standard.set(encodedWeights, forKey: "exercise_database_weights")
         }
         UserDefaults.standard.set(backup.customExercises, forKey: "exercise_database_custom")
+        UserDefaults.standard.set(backup.hiddenExercises, forKey: "exercise_database_hidden")
         
         // 2. CRITICAL FIX: Update the Bindings!
         // This ensures that when onSave() is called, it reads these values instead of empty strings
@@ -209,4 +212,3 @@ struct OnboardingView: View {
         onSave()
     }
 }
-

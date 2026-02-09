@@ -11,6 +11,7 @@ struct ExerciseMenuButton: View, Equatable {
     let exercises: [Exercise]
     let database: ExerciseDatabase
     let workoutManager: WorkoutManager
+    let barbellBaseWeights: [String: Double]
     var onEditNote: ((Exercise) -> Void)? = nil
     
     // MARK: - Equatable Implementation
@@ -19,7 +20,7 @@ struct ExerciseMenuButton: View, Equatable {
     static func == (lhs: ExerciseMenuButton, rhs: ExerciseMenuButton) -> Bool {
         // We only redraw if the exercises array changes.
         // We ignore onEditNote and managers since they are stable references/closures.
-        return lhs.exercises == rhs.exercises
+        return lhs.exercises == rhs.exercises && lhs.barbellBaseWeights == rhs.barbellBaseWeights
     }
     
     @State private var exerciseToEdit: Exercise?
@@ -52,24 +53,58 @@ struct ExerciseMenuButton: View, Equatable {
                     } label: {
                         Label("Change Reps", systemImage: "arrow.triangle.2.circlepath")
                     }
-                    
-                    // Barbell Weight Nested Menu
-                    if [.barbell, .barbell25, .smithMachine].contains(exercise.equipment) {
+
+                    Menu {
+                        ForEach(Equipment.allCases, id: \.self) { equipment in
+                            Button {
+                                workoutManager.updateEquipment(for: exercise.name, to: equipment)
+                            } label: {
+                                if exercise.equipment == equipment {
+                                    Label(equipment.rawValue, systemImage: "checkmark")
+                                } else {
+                                    Label(equipment.rawValue, systemImage: equipment.iconName)
+                                }
+                            }
+                        }
+                    } label: {
+                        Label("Change Equipment", systemImage: "wrench.and.screwdriver")
+                    }
+                    .id("equipment-menu-\(exercise.id)")
+
+                    if exercise.equipment == .barbell {
+                        let currentBase = workoutManager.getBarbellBaseWeight(for: exercise.name, defaultWeight: exercise.equipment.baseWeight)
                         Menu {
-                            Button("45 lbs (Standard)") {
-                                workoutManager.updateEquipment(for: exercise.name, to: .barbell)
+                            Button {
+                                workoutManager.updateBarbellBaseWeight(for: exercise.name, to: 45)
+                            } label: {
+                                if currentBase == 45 {
+                                    Label("45 lbs (Standard)", systemImage: "checkmark")
+                                } else {
+                                    Label("45 lbs (Standard)", systemImage: "scalemass.fill")
+                                }
                             }
-                            Button("25 lbs (Preacher)") {
-                                workoutManager.updateEquipment(for: exercise.name, to: .barbell25)
+                            Button {
+                                workoutManager.updateBarbellBaseWeight(for: exercise.name, to: 25)
+                            } label: {
+                                if currentBase == 25 {
+                                    Label("25 lbs (Preacher)", systemImage: "checkmark")
+                                } else {
+                                    Label("25 lbs (Preacher)", systemImage: "scalemass.fill")
+                                }
                             }
-                            Button("15 lbs (Smith)") {
-                                workoutManager.updateEquipment(for: exercise.name, to: .smithMachine)
+                            Button {
+                                workoutManager.updateBarbellBaseWeight(for: exercise.name, to: 15)
+                            } label: {
+                                if currentBase == 15 {
+                                    Label("15 lbs (Smith)", systemImage: "checkmark")
+                                } else {
+                                    Label("15 lbs (Smith)", systemImage: "scalemass.fill")
+                                }
                             }
                         } label: {
-                            Label("Barbell Weight", systemImage: "dumbbell.fill")
+                            Label("Barbell Weight", systemImage: "scalemass")
                         }
-                        // Unique ID ensures the menu doesn't conflict with others in the superset
-                        .id("barbell-menu-\(exercise.id)")
+                        .id("barbell-weight-\(exercise.id)")
                     }
 
                     if let onEditNote = onEditNote {

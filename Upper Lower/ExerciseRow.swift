@@ -10,6 +10,7 @@ import SwiftUI
 struct ExerciseRow: View {
     let exercise: Exercise
     let userProfile: UserProfile
+    let dayName: String
     var connectedUp: Bool = false
     var connectedDown: Bool = false
     var showSeparator: Bool = true
@@ -43,14 +44,31 @@ struct ExerciseRow: View {
         return 0
     }
     
-    var displayWeight: String {
+    var currentWeightValue: Double? {
+        if exercise.equipment == .bodyweight { return nil }
         if let manualWeight = database.getWeight(for: exercise.name) {
-            return "\(Int(manualWeight))"
+            return manualWeight
         }
         if let target = exercise.targetWeight(userProfile: userProfile) {
-            return "\(Int(target))"
+            return target
         }
-        return "-"
+        return nil
+    }
+    
+    var displayWeight: String {
+        guard let weight = currentWeightValue else { return "-" }
+        return weight.formattedWeight
+    }
+    
+    var previousWeightValue: Double? {
+        let previousWorkout = workoutManager.history.last { $0.dayName == dayName }
+        guard let exerciseLog = previousWorkout?.exercises.first(where: { $0.name == exercise.name }) else { return nil }
+        return exerciseLog.sets.last?.weight
+    }
+    
+    var isWeightIncreased: Bool {
+        guard let current = currentWeightValue, let previous = previousWeightValue else { return false }
+        return current > previous + 0.01
     }
     
     var displayReps: String {
@@ -77,7 +95,7 @@ struct ExerciseRow: View {
                             .font(.system(size: 10))
                             .foregroundColor(.gray.opacity(0.8))
                             .frame(width: 14, height: 14)
-                            .background(Color.black)
+                            .background(Color.clear)
                         
                         if connectedDown {
                             Rectangle()
@@ -120,7 +138,7 @@ struct ExerciseRow: View {
                         
                         Text("SETS")
                             .font(.system(size: setsLabelSize, weight: .black)) // ADAPTIVE
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(.primary.opacity(0.7))
                     }
                 }
                 .frame(width: boxSize, height: boxSize) // ADAPTIVE
@@ -132,16 +150,30 @@ struct ExerciseRow: View {
                     Text(exercise.name)
                         .font(.subheadline)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                         .lineLimit(2)
                     
                     HStack {
                         if exercise.equipment != .bodyweight {
                             if displayWeight != "-" {
-                                Text("\(displayWeight) lbs")
-                                    .font(.caption)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.gray)
+                                HStack(spacing: 6) {
+                                    Text("\(displayWeight) lbs")
+                                        .font(.caption)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.gray)
+                                    
+                                    if isWeightIncreased {
+                                        ZStack {
+                                            Circle().fill(Color.green)
+                                            Image(systemName: "arrow.up")
+                                                .font(.caption2.weight(.bold))
+                                                .foregroundColor(.white)
+                                        }
+                                        .frame(width: 16, height: 16)
+                                        .accessibilityLabel("Weight increased")
+                                    }
+                                }
+                                
                                 Text("•")
                                     .font(.caption)
                                     .foregroundColor(.gray)
@@ -169,7 +201,7 @@ struct ExerciseRow: View {
                 }
             }
             .padding(.vertical, 12)
-            .background(Color.black)
+            .background(Color(UIColor.systemBackground))
             
             if showSeparator {
                 Divider()

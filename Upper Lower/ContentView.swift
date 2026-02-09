@@ -100,6 +100,7 @@ struct HomeView: View {
     @Binding var selectedTab: Int
     
     @EnvironmentObject var workoutManager: WorkoutManager
+    @EnvironmentObject var exerciseDatabase: ExerciseDatabase
     
     @State private var showResetAlert = false
     @State private var showGraduationAlert = false
@@ -242,6 +243,7 @@ struct HomeView: View {
         .alert("Reset to Week 1?", isPresented: $showResetAlert) {
             Button("Reset", role: .destructive) {
                 workoutManager.resetProgram()
+                exerciseDatabase.clearPercentBasedWeights()
             }
             Button("Cancel", role: .cancel) {}
         } message: {
@@ -258,10 +260,12 @@ struct HomeView: View {
                 deadliftMax += 10
                 benchMax += 5
                 workoutManager.resetProgram()
+                exerciseDatabase.clearPercentBasedWeights()
             }
             
             Button("Restart (No Increase)", role: .none) {
                 workoutManager.resetProgram()
+                exerciseDatabase.clearPercentBasedWeights()
             }
             
             Button("Cancel", role: .cancel) {
@@ -451,4 +455,3 @@ struct WorkoutDayCard: View {
         .opacity(isCompleted ? 0.5 : 1.0)
     }
 }
-

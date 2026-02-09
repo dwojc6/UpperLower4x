@@ -30,8 +30,10 @@ struct WorkoutDetailView: View {
     @State private var exerciseToEdit: Exercise?
     @State private var showWeightAlert = false
     @State private var showRepsAlert = false
+    @State private var showNoteEditor = false
     @State private var weightInput = ""
     @State private var repsInput = ""
+    @State private var noteInput = ""
     
     // MARK: - Adaptive Metrics
     @ScaledMetric var endButtonHeight: CGFloat = 38
@@ -63,7 +65,7 @@ struct WorkoutDetailView: View {
     
     var body: some View {
         ZStack(alignment: .bottom) {
-            Color.black.edgesIgnoringSafeArea(.all)
+            Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all)
             
             // 1. Main Content List
             contentList
@@ -114,6 +116,9 @@ struct WorkoutDetailView: View {
             // UPDATED: Pass the full day object
             AddExerciseToDaySheet(day: day)
         }
+        .fullScreenCover(isPresented: $showNoteEditor) {
+            noteEditorView
+        }
         .alert("Set Weight (lbs)", isPresented: $showWeightAlert) {
             TextField("Weight", text: $weightInput).keyboardType(.decimalPad)
             Button("Save") {
@@ -136,6 +141,48 @@ struct WorkoutDetailView: View {
         }
     }
     
+    // MARK: - Note Editor View
+    var noteEditorView: some View {
+        NavigationView {
+            ZStack {
+                Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all)
+                VStack {
+                    if let exercise = exerciseToEdit {
+                        Text(exercise.name.uppercased())
+                            .font(.title2)
+                            .fontWeight(.heavy)
+                            .foregroundColor(.primary)
+                            .padding(.top)
+                    }
+
+                    TextEditor(text: $noteInput)
+                        .font(.body)
+                        .foregroundColor(.primary)
+                        .padding()
+                        .frame(maxHeight: .infinity)
+
+                    Spacer()
+                }
+            }
+            .navigationTitle("Edit Note")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        showNoteEditor = false
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Save") {
+                        saveNote()
+                        showNoteEditor = false
+                    }
+                    .fontWeight(.semibold)
+                }
+            }
+        }
+    }
+
     // MARK: - Custom Alert View
     var customSaveAlert: some View {
         VStack(spacing: 0) {
@@ -145,7 +192,7 @@ struct WorkoutDetailView: View {
                 Text("Save workout?")
                     .font(.title3)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundColor(.primary)
                 
                 Text(workoutManager.isCurrentSessionComplete
                      ? "You have completed all exercises. Do you want to save your workout?"
@@ -210,6 +257,24 @@ struct WorkoutDetailView: View {
     
     // MARK: - Subviews
     
+    // UPDATED: Rest Timer Pill (Text Only, No Background Fill)
+    var restTimerPill: some View {
+        Button(action: {
+            withAnimation {
+                workoutManager.toggleRestTimerPause()
+            }
+        }) {
+            HStack(spacing: 0) {
+                Text(timeString(time: workoutManager.restTimeRemaining))
+                    .font(.headline)
+                    .monospacedDigit()
+                    .fontWeight(.bold)
+            }
+            // Removed background and clipShape
+            .foregroundColor(workoutManager.isRestTimerPaused ? .yellow : .green)
+        }
+    }
+    
     var contentList: some View {
         List {
             headerSection
@@ -229,6 +294,13 @@ struct WorkoutDetailView: View {
     
     var toolbarItems: some ToolbarContent {
         Group {
+            // NEW: Rest Timer in Leading Toolbar position (Top Left)
+            ToolbarItem(placement: .navigationBarLeading) {
+                if isSessionView && workoutManager.isRestTimerActive && !workoutManager.isCurrentSessionComplete {
+                    restTimerPill
+                }
+            }
+            
             ToolbarItem(placement: .navigationBarTrailing) {
                 if isSessionView && workoutManager.isSessionActive {
                     Button(action: {
@@ -258,7 +330,7 @@ struct WorkoutDetailView: View {
                         }
                     }) {
                         Image(systemName: editMode == .active ? "checkmark.circle.fill" : "arrow.up.arrow.down")
-                            .font(.system(size: 16, weight: .bold)) // Consider removing fixed size here too, but SF symbols scale mostly ok
+                            .font(.system(size: 16, weight: .bold))
                             .foregroundColor(.green)
                     }
                     
@@ -295,7 +367,7 @@ struct WorkoutDetailView: View {
             .padding(.bottom, endButtonBottomPadding) // ADAPTIVE
         }
         .background(
-            LinearGradient(colors: [.black.opacity(0), .black], startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [Color(UIColor.systemBackground).opacity(0), Color(UIColor.systemBackground)], startPoint: .top, endPoint: .bottom)
                 .frame(height: endButtonHeight + endButtonBottomPadding + 20)
                 .padding(.top, -20)
         )
@@ -305,10 +377,10 @@ struct WorkoutDetailView: View {
         VStack(spacing: 20) {
             HStack {
                 VStack(alignment: .leading) {
-                    Text(day.name.uppercased())
-                        .font(.largeTitle)
-                        .fontWeight(.black)
-                        .foregroundColor(.white)
+                     Text(day.name.uppercased())
+                         .font(.largeTitle)
+                         .fontWeight(.black)
+                         .foregroundColor(.primary)
                     Text("Week \(day.week)")
                         .font(.headline)
                         .foregroundColor(.green)
@@ -352,7 +424,12 @@ struct WorkoutDetailView: View {
                     fullDayExercises: exercisesList,
                     userProfile: userProfile,
                     isSessionView: isSessionView,
-                    historicalWorkout: historicalWorkout
+                    historicalWorkout: historicalWorkout,
+                    onEditNote: { selectedExercise in
+                        exerciseToEdit = selectedExercise
+                        noteInput = selectedExercise.rpeOrNotes
+                        showNoteEditor = true
+                    }
                 )) {
                     EmptyView()
                 }
@@ -361,6 +438,7 @@ struct WorkoutDetailView: View {
                 ExerciseRow(
                     exercise: exercise,
                     userProfile: userProfile,
+                    dayName: day.name,
                     connectedUp: connection.up,
                     connectedDown: connection.down,
                     showSeparator: index < exercisesList.count - 1,
@@ -370,7 +448,7 @@ struct WorkoutDetailView: View {
                     isDayComplete: workoutManager.isDayComplete(day: day)
                 )
             }
-            .listRowBackground(Color.black)
+            .listRowBackground(Color(UIColor.systemBackground))
             .listRowSeparator(.hidden)
             .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -395,7 +473,12 @@ struct WorkoutDetailView: View {
     func contextMenuButtons(for exercise: Exercise, in list: [Exercise]) -> some View {
         Button {
             exerciseToEdit = exercise
-            weightInput = "\(Int(database.getWeight(for: exercise.name) ?? 0))"
+            // CHANGED
+            if let w = database.getWeight(for: exercise.name) {
+                weightInput = w.formattedWeight
+            } else {
+                weightInput = "0"
+            }
             showWeightAlert = true
         } label: {
             Label("Change Weight", systemImage: "scalemass")
@@ -408,7 +491,7 @@ struct WorkoutDetailView: View {
         } label: {
             Label("Change Reps", systemImage: "arrow.triangle.2.circlepath")
         }
-        
+
         if let _ = workoutManager.getSupersetPartners(for: exercise.name, dayName: day.name) {
             Button(role: .destructive) {
                 workoutManager.removeSuperset(for: exercise.name, dayName: day.name)
@@ -480,6 +563,19 @@ struct WorkoutDetailView: View {
     func moveExercises(from source: IndexSet, to destination: Int) {
         exercisesList.move(fromOffsets: source, toOffset: destination)
         workoutManager.saveNewOrder(dayName: day.name, exercises: exercisesList)
+    }
+    
+    func timeString(time: Int) -> String {
+        let minutes = time / 60
+        let seconds = time % 60
+        return String(format: "%02d:%02d", minutes, seconds)
+    }
+
+    func saveNote() {
+        if let exercise = exerciseToEdit {
+            workoutManager.updateNotes(for: exercise.name, notes: noteInput)
+            loadAndSortExercises()
+        }
     }
 }
 

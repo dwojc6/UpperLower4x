@@ -48,16 +48,16 @@ class ProgramData {
                 Exercise(name: "Seated T-Bar Row", sets: 3, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze shoulder blades together at the top, control the weight", equipment: .machine),
                 Exercise(name: "Dumbbell Incline Press", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "3-second pause", equipment: .dumbbell),
                 Exercise(name: "Skull Crusher", sets: 3, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "8 reps, rest 5 seconds, 2 reps, rest 5 seconds, 2 reps", equipment: .barbell),
-                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ]),
             WorkoutDay(name: "Day 3", week: weekNum, exercises: [
                 Exercise(name: "Deadlift", sets: 2, reps: "5", liftType: .deadlift, percentageOf1RM: 0.8, rpeOrNotes: "Brace your lats, chest tall, hips high, pull the slack out of the bar prior to moving it off the ground", equipment: .barbell),
                 // CHANGED: Renamed to Accessory, type .accessory, nil percentage
-                Exercise(name: "A1 Back Squat", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Sit back and down, 15° toe flare, drive your knees out laterally", equipment: .barbell),
+                Exercise(name: "Front Squat", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Sit back and down, 15° toe flare, drive your knees out laterally", equipment: .barbell),
                 Exercise(name: "Barbell Hip Thrust", sets: 4, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze your glutes at the top", equipment: .barbell),
                 Exercise(name: "Leg Extension", sets: 3, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "12 reps each leg, bilateral concentric, unilateral eccentric", equipment: .machine),
                 Exercise(name: "Lying Leg Curl", sets: 3, reps: "20", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Flex your hamstrings", equipment: .machine),
-                Exercise(name: "Lower Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Lower Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ]),
             WorkoutDay(name: "Day 4", week: weekNum, exercises: [
                 Exercise(name: "Wide-Grip Pull-Up", sets: 3, reps: "6", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Pull your chest to the bar", equipment: .bodyweight),
@@ -67,7 +67,7 @@ class ProgramData {
                 Exercise(name: "Face Pulls", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on squeezing your shoulder blades together", equipment: .cable),
                 Exercise(name: "Machine Lateral Raise", sets: 3, reps: "24", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Dropset", equipment: .machine),
                 Exercise(name: "Dumbbell Curl", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Supinate against the dumbbell", equipment: .dumbbell),
-                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ])
         ]
     }
@@ -91,16 +91,16 @@ class ProgramData {
                 Exercise(name: "Seated T-Bar Row", sets: 3, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze shoulder blades together at the top, control the weight", equipment: .machine),
                 Exercise(name: "Dumbbell Incline Press", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "3-second pause", equipment: .dumbbell),
                 Exercise(name: "Skull Crusher", sets: 3, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "8 reps, rest 5 seconds, 2 reps, rest 5 seconds, 2 reps", equipment: .barbell),
-                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ]),
             WorkoutDay(name: "Day 3", week: weekNum, exercises: [
                 Exercise(name: "Deadlift", sets: 3, reps: "5", liftType: .deadlift, percentageOf1RM: 0.8, rpeOrNotes: "Brace your lats, chest tall, hips high, pull the slack out of the bar prior to moving it off the ground", equipment: .barbell),
                 // CHANGED
-                Exercise(name: "A1 Back Squat", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Sit back and down, 15° toe flare, drive your knees out laterally", equipment: .barbell),
+                Exercise(name: "Front Squat", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Sit back and down, 15° toe flare, drive your knees out laterally", equipment: .barbell),
                 Exercise(name: "Barbell Hip Thrust", sets: 4, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze your glutes at the top", equipment: .barbell),
                 Exercise(name: "Leg Extension", sets: 3, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "12 reps each leg, bilateral concentric, unilateral eccentric", equipment: .machine),
                 Exercise(name: "Lying Leg Curl", sets: 3, reps: "20", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Flex your hamstrings", equipment: .machine),
-                Exercise(name: "Lower Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Lower Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ]),
             WorkoutDay(name: "Day 4", week: weekNum, exercises: [
                 Exercise(name: "Wide-Grip Pull-Up", sets: 4, reps: "6", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Pull your chest to the bar", equipment: .bodyweight),
@@ -110,7 +110,7 @@ class ProgramData {
                 Exercise(name: "Face Pulls", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on squeezing your shoulder blades together", equipment: .cable),
                 Exercise(name: "Machine Lateral Raise", sets: 3, reps: "24", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Dropset", equipment: .machine),
                 Exercise(name: "Dumbbell Curl", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Supinate against the dumbbell", equipment: .dumbbell),
-                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ])
         ]
     }
@@ -134,16 +134,16 @@ class ProgramData {
                 Exercise(name: "Seated T-Bar Row", sets: 3, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze shoulder blades together at the top, control the weight", equipment: .machine),
                 Exercise(name: "Dumbbell Incline Press", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "3-second pause", equipment: .dumbbell),
                 Exercise(name: "Skull Crusher", sets: 3, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "8 reps, rest 5 seconds, 2 reps, rest 5 seconds, 2 reps", equipment: .barbell),
-                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ]),
             WorkoutDay(name: "Day 3", week: weekNum, exercises: [
                 Exercise(name: "Deadlift", sets: 4, reps: "5", liftType: .deadlift, percentageOf1RM: 0.8, rpeOrNotes: "Brace your lats, chest tall, hips high, pull the slack out of the bar prior to moving it off the ground", equipment: .barbell),
                 // CHANGED
-                Exercise(name: "A1 Back Squat", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Sit back and down, 15° toe flare, drive your knees out laterally", equipment: .barbell),
+                Exercise(name: "Front Squat", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Sit back and down, 15° toe flare, drive your knees out laterally", equipment: .barbell),
                 Exercise(name: "Barbell Hip Thrust", sets: 4, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze your glutes at the top", equipment: .barbell),
                 Exercise(name: "Leg Extension", sets: 3, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "12 reps each leg, bilateral concentric, unilateral eccentric", equipment: .machine),
                 Exercise(name: "Lying Leg Curl", sets: 3, reps: "20", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Flex your hamstrings", equipment: .machine),
-                Exercise(name: "Lower Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Lower Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ]),
             WorkoutDay(name: "Day 4", week: weekNum, exercises: [
                 Exercise(name: "Wide-Grip Pull-Up", sets: 5, reps: "6", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Pull your chest to the bar", equipment: .bodyweight),
@@ -153,7 +153,7 @@ class ProgramData {
                 Exercise(name: "Face Pulls", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on squeezing your shoulder blades together", equipment: .cable),
                 Exercise(name: "Machine Lateral Raise", sets: 4, reps: "24", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Dropset", equipment: .machine),
                 Exercise(name: "Dumbbell Curl", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Supinate against the dumbbell", equipment: .dumbbell),
-                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ])
         ]
     }
@@ -177,17 +177,17 @@ class ProgramData {
                 Exercise(name: "Cable Row", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "2-second lowering phase", equipment: .cable),
                 Exercise(name: "Machine Chest Press", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on squeezing your chest", equipment: .machine),
                 Exercise(name: "Cable Triceps Kickback", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on squeezing your triceps", equipment: .cable),
-                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ]),
             WorkoutDay(name: "Day 3", week: weekNum, exercises: [
                 Exercise(name: "Deadlift", sets: 2, reps: "5", liftType: .deadlift, percentageOf1RM: 0.825, rpeOrNotes: "Brace your lats, chest tall, hips high, pull the slack out of the bar prior to moving it off the ground", equipment: .barbell),
                 // CHANGED
-                Exercise(name: "A1 Back Squat", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Sit back and down, 15° toe flare, drive your knees out laterally", equipment: .barbell),
+                Exercise(name: "Front Squat", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Sit back and down, 15° toe flare, drive your knees out laterally", equipment: .barbell),
                 Exercise(name: "Bulgarian Split Squat", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Elevate your back foot 12 inch", equipment: .dumbbell),
                 Exercise(name: "Leg Extension", sets: 3, reps: "20", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Flex your quads", equipment: .machine),
                 Exercise(name: "Leg Curl", sets: 2, reps: "20", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Flex your hamstrings", equipment: .machine),
                 Exercise(name: "Machine Hip Abduction", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze your glutes", equipment: .machine),
-                Exercise(name: "Lower Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Lower Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ]),
             WorkoutDay(name: "Day 4", week: weekNum, exercises: [
                 Exercise(name: "Wide-Grip Pull-Up", sets: 3, reps: "6", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Pull with your chest to the bar", equipment: .bodyweight),
@@ -197,7 +197,7 @@ class ProgramData {
                 Exercise(name: "Dumbbell Reverse Fly", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on squeezing your shoulder blades together", equipment: .dumbbell),
                 Exercise(name: "Dumbbell Front Raise/Lateral Raise", sets: 3, reps: "30", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "15 reps front raise, 15 reps lateral raise", equipment: .dumbbell),
                 Exercise(name: "EZ Bar Curl 21s", sets: 3, reps: "21", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "7 reps bottom half of ROM, 7 reps top half of ROM, 7 reps full ROM", equipment: .barbell),
-                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ])
         ]
     }
@@ -221,17 +221,17 @@ class ProgramData {
                 Exercise(name: "Cable Row", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "2-second lowering phase", equipment: .cable),
                 Exercise(name: "Machine Chest Press", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on squeezing your chest", equipment: .machine),
                 Exercise(name: "Cable Triceps Kickback", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on squeezing your triceps", equipment: .cable),
-                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ]),
             WorkoutDay(name: "Day 3", week: weekNum, exercises: [
                 Exercise(name: "Deadlift", sets: 3, reps: "5", liftType: .deadlift, percentageOf1RM: 0.825, rpeOrNotes: "Brace your lats, chest tall, hips high, pull the slack out of the bar prior to moving it off the ground", equipment: .barbell),
                 // CHANGED
-                Exercise(name: "A1 Back Squat", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Sit back and down, 15° toe flare, drive your knees out laterally", equipment: .barbell),
+                Exercise(name: "Front Squat", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Sit back and down, 15° toe flare, drive your knees out laterally", equipment: .barbell),
                 Exercise(name: "Bulgarian Split Squat", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Elevate your back foot 12 inch", equipment: .dumbbell),
                 Exercise(name: "Leg Extension", sets: 3, reps: "20", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Flex your quads", equipment: .machine),
                 Exercise(name: "Leg Curl", sets: 2, reps: "20", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Flex your hamstrings", equipment: .machine),
                 Exercise(name: "Machine Hip Abduction", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze your glutes", equipment: .machine),
-                Exercise(name: "Lower Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Lower Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ]),
             WorkoutDay(name: "Day 4", week: weekNum, exercises: [
                 Exercise(name: "Wide-Grip Pull-Up", sets: 4, reps: "6", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Pull with your chest to the bar", equipment: .bodyweight),
@@ -241,7 +241,7 @@ class ProgramData {
                 Exercise(name: "Dumbbell Reverse Fly", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on squeezing your shoulder blades together", equipment: .dumbbell),
                 Exercise(name: "Dumbbell Front Raise/Lateral Raise", sets: 3, reps: "30", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "15 reps front raise, 15 reps lateral raise", equipment: .dumbbell),
                 Exercise(name: "EZ Bar Curl 21s", sets: 3, reps: "21", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "7 reps bottom half of ROM, 7 reps top half of ROM, 7 reps full ROM", equipment: .barbell),
-                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ])
         ]
     }
@@ -265,17 +265,17 @@ class ProgramData {
                 Exercise(name: "Cable Row", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "2-second lowering phase", equipment: .cable),
                 Exercise(name: "Machine Chest Press", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on squeezing your chest", equipment: .machine),
                 Exercise(name: "Cable Triceps Kickback", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on squeezing your triceps", equipment: .cable),
-                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ]),
             WorkoutDay(name: "Day 3", week: weekNum, exercises: [
                 Exercise(name: "Deadlift", sets: 4, reps: "5", liftType: .deadlift, percentageOf1RM: 0.825, rpeOrNotes: "Brace your lats, chest tall, hips high, pull the slack out of the bar prior to moving it off the ground", equipment: .barbell),
                 // CHANGED
-                Exercise(name: "A1 Back Squat", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Sit back and down, 15° toe flare, drive your knees out laterally", equipment: .barbell),
+                Exercise(name: "Front Squat", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Sit back and down, 15° toe flare, drive your knees out laterally", equipment: .barbell),
                 Exercise(name: "Bulgarian Split Squat", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Elevate your back foot 12 inch", equipment: .dumbbell),
                 Exercise(name: "Leg Extension", sets: 3, reps: "20", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Flex your quads", equipment: .machine),
                 Exercise(name: "Leg Curl", sets: 2, reps: "20", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Flex your hamstrings", equipment: .machine),
                 Exercise(name: "Machine Hip Abduction", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze your glutes", equipment: .machine),
-                Exercise(name: "Lower Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Lower Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ]),
             WorkoutDay(name: "Day 4", week: weekNum, exercises: [
                 Exercise(name: "Wide-Grip Pull-Up", sets: 5, reps: "6", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Pull with your chest to the bar", equipment: .bodyweight),
@@ -285,7 +285,7 @@ class ProgramData {
                 Exercise(name: "Dumbbell Reverse Fly", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on squeezing your shoulder blades together", equipment: .dumbbell),
                 Exercise(name: "Dumbbell Front Raise/Lateral Raise", sets: 4, reps: "30", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "15 reps front raise, 15 reps lateral raise", equipment: .dumbbell),
                 Exercise(name: "EZ Bar Curl 21s", sets: 3, reps: "21", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "7 reps bottom half of ROM, 7 reps top half of ROM, 7 reps full ROM", equipment: .barbell),
-                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ])
         ]
     }
@@ -309,27 +309,27 @@ class ProgramData {
                 Exercise(name: "Machine High Row", sets: 2, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Stretch your lats at the top", equipment: .machine),
                 Exercise(name: "Push-Up", sets: 3, reps: "AMRAP", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze your pecs", equipment: .bodyweight),
                 Exercise(name: "Rope Overhead Triceps Extension", sets: 4, reps: "10", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Use your non-working arm to assist with the concentric", equipment: .cable),
-                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ]),
             WorkoutDay(name: "Day 3", week: weekNum, exercises: [
                 Exercise(name: "Deadlift", sets: 2, reps: "5", liftType: .deadlift, percentageOf1RM: 0.85, rpeOrNotes: "Brace your lats, chest tall, hips high, pull the slack out of the bar prior to moving it off the ground", equipment: .barbell),
                 // CHANGED
-                Exercise(name: "A1 Back Squat", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Sit back and down, 15° toe flare, drive your knees out laterally", equipment: .barbell),
+                Exercise(name: "Front Squat", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Sit back and down, 15° toe flare, drive your knees out laterally", equipment: .barbell),
                 Exercise(name: "Dumbbell Step-Up", sets: 3, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Set the box to ~parallel", equipment: .dumbbell),
                 Exercise(name: "Reverse Hyper", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on squeezing your glutes", equipment: .machine),
                 Exercise(name: "Single-Leg Leg Extension", sets: 2, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "12 reps each leg", equipment: .machine),
                 Exercise(name: "Cable Standing Hip Abduction", sets: 3, reps: "10", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze your glutes", equipment: .cable),
-                Exercise(name: "Lower Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Lower Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ]),
             WorkoutDay(name: "Day 4", week: weekNum, exercises: [
                 Exercise(name: "Wide-Grip Pull-Up", sets: 3, reps: "6", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Pull with your chest to the bar", equipment: .bodyweight),
                 Exercise(name: "Barbell Incline Press", sets: 4, reps: "8", liftType: .bench, percentageOf1RM: nil, rpeOrNotes: "Keep your elbows out", equipment: .barbell),
                 Exercise(name: "Barbell Bent Over Row", sets: 3, reps: "10", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Pull to your upper abs", equipment: .barbell),
                 Exercise(name: "Barbell Floor Press", sets: 3, reps: "10", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on squeezing your chest", equipment: .barbell),
-                Exercise(name: "Band Pull-Apart", sets: 2, reps: "30", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze your shoulder blades together", equipment: .other),
+                Exercise(name: "Band Pull-Apart", sets: 2, reps: "30", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze your shoulder blades together", equipment: .cable),
                 Exercise(name: "Arnold Press", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Start with your elbows in front of you and palms facing in. Rotate the dumbbells so that your palms face forward as you press", equipment: .dumbbell),
                 Exercise(name: "Hammer Curl", sets: 3, reps: "10", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "3-second lowering phase", equipment: .dumbbell),
-                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ])
         ]
     }
@@ -353,27 +353,27 @@ class ProgramData {
                 Exercise(name: "Machine High Row", sets: 2, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Stretch your lats at the top", equipment: .machine),
                 Exercise(name: "Push-Up", sets: 3, reps: "AMRAP", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze your pecs", equipment: .bodyweight),
                 Exercise(name: "Rope Overhead Triceps Extension", sets: 4, reps: "10", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Use your non-working arm to assist with the concentric", equipment: .cable),
-                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ]),
             WorkoutDay(name: "Day 3", week: weekNum, exercises: [
                 Exercise(name: "Deadlift", sets: 3, reps: "5", liftType: .deadlift, percentageOf1RM: 0.85, rpeOrNotes: "Brace your lats, chest tall, hips high, pull the slack out of the bar prior to moving it off the ground", equipment: .barbell),
                 // CHANGED
-                Exercise(name: "A1 Back Squat", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Sit back and down, 15° toe flare, drive your knees out laterally", equipment: .barbell),
+                Exercise(name: "Front Squat", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Sit back and down, 15° toe flare, drive your knees out laterally", equipment: .barbell),
                 Exercise(name: "Dumbbell Step-Up", sets: 3, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Set the box to ~parallel", equipment: .dumbbell),
                 Exercise(name: "Reverse Hyper", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on squeezing your glutes", equipment: .machine),
                 Exercise(name: "Single-Leg Leg Extension", sets: 2, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "12 reps each leg", equipment: .machine),
                 Exercise(name: "Cable Standing Hip Abduction", sets: 3, reps: "10", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze your glutes", equipment: .cable),
-                Exercise(name: "Lower Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Lower Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ]),
             WorkoutDay(name: "Day 4", week: weekNum, exercises: [
                 Exercise(name: "Wide-Grip Pull-Up", sets: 4, reps: "6", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Pull with your chest to the bar", equipment: .bodyweight),
                 Exercise(name: "Barbell Incline Press", sets: 4, reps: "8", liftType: .bench, percentageOf1RM: nil, rpeOrNotes: "Keep your elbows out", equipment: .barbell),
                 Exercise(name: "Barbell Bent Over Row", sets: 3, reps: "10", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Pull to your upper abs", equipment: .barbell),
                 Exercise(name: "Barbell Floor Press", sets: 3, reps: "10", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on squeezing your chest", equipment: .barbell),
-                Exercise(name: "Band Pull-Apart", sets: 2, reps: "30", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze your shoulder blades together", equipment: .other),
+                Exercise(name: "Band Pull-Apart", sets: 2, reps: "30", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze your shoulder blades together", equipment: .cable),
                 Exercise(name: "Arnold Press", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Start with your elbows in front of you and palms facing in. Rotate the dumbbells so that your palms face forward as you press", equipment: .dumbbell),
                 Exercise(name: "Hammer Curl", sets: 3, reps: "10", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "3-second lowering phase", equipment: .dumbbell),
-                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ])
         ]
     }
@@ -397,27 +397,27 @@ class ProgramData {
                 Exercise(name: "Machine High Row", sets: 2, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Stretch your lats at the top", equipment: .machine),
                 Exercise(name: "Push-Up", sets: 3, reps: "AMRAP", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze your pecs", equipment: .bodyweight),
                 Exercise(name: "Rope Overhead Triceps Extension", sets: 4, reps: "10", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Use your non-working arm to assist with the concentric", equipment: .cable),
-                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ]),
             WorkoutDay(name: "Day 3", week: weekNum, exercises: [
                 Exercise(name: "Deadlift", sets: 4, reps: "5", liftType: .deadlift, percentageOf1RM: 0.85, rpeOrNotes: "Brace your lats, chest tall, hips high, pull the slack out of the bar prior to moving it off the ground", equipment: .barbell),
                 // CHANGED
-                Exercise(name: "A1 Back Squat", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Sit back and down, 15° toe flare, drive your knees out laterally", equipment: .barbell),
+                Exercise(name: "Front Squat", sets: 3, reps: "8", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Sit back and down, 15° toe flare, drive your knees out laterally", equipment: .barbell),
                 Exercise(name: "Dumbbell Step-Up", sets: 3, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Set the box to ~parallel", equipment: .dumbbell),
                 Exercise(name: "Reverse Hyper", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on squeezing your glutes", equipment: .machine),
                 Exercise(name: "Single-Leg Leg Extension", sets: 2, reps: "12", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "12 reps each leg", equipment: .machine),
                 Exercise(name: "Cable Standing Hip Abduction", sets: 3, reps: "10", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze your glutes", equipment: .cable),
-                Exercise(name: "Lower Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Lower Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ]),
             WorkoutDay(name: "Day 4", week: weekNum, exercises: [
                 Exercise(name: "Wide-Grip Pull-Up", sets: 5, reps: "6", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Pull with your chest to the bar", equipment: .bodyweight),
                 Exercise(name: "Barbell Incline Press", sets: 4, reps: "8", liftType: .bench, percentageOf1RM: nil, rpeOrNotes: "Keep your elbows out", equipment: .barbell),
                 Exercise(name: "Barbell Bent Over Row", sets: 3, reps: "10", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Pull to your upper abs", equipment: .barbell),
                 Exercise(name: "Barbell Floor Press", sets: 3, reps: "10", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on squeezing your chest", equipment: .barbell),
-                Exercise(name: "Band Pull-Apart", sets: 2, reps: "30", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze your shoulder blades together", equipment: .other),
+                Exercise(name: "Band Pull-Apart", sets: 2, reps: "30", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Squeeze your shoulder blades together", equipment: .cable),
                 Exercise(name: "Arnold Press", sets: 4, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Start with your elbows in front of you and palms facing in. Rotate the dumbbells so that your palms face forward as you press", equipment: .dumbbell),
                 Exercise(name: "Hammer Curl", sets: 3, reps: "10", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "3-second lowering phase", equipment: .dumbbell),
-                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .other)
+                Exercise(name: "Upper Body Weak Point 1", sets: 3, reps: "15", liftType: .accessory, percentageOf1RM: nil, rpeOrNotes: "Focus on mind-muscle connection", equipment: .plateLoaded)
             ])
         ]
     }

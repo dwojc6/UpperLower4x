@@ -9,43 +9,83 @@ import Foundation
 
 // MARK: - Equipment Enum
 enum Equipment: String, Codable, CaseIterable, Equatable, Sendable {
-    case barbell = "Barbell (45 lbs)"
-    case barbell25 = "Barbell (25 lbs)"
-    case smithMachine = "Smith Machine (15 lbs)"
+    case barbell = "Barbell"
     case machine = "Machine"
+    case plateLoaded = "Plate Loaded"
     case cable = "Cable"
-    case bodyweight = "Bodyweight"
+    case kettlebell = "Kettlebell"
     case dumbbell = "Dumbbell"
-    case other = "Other"
+    case bodyweight = "Body Weight"
+
+    static var allCases: [Equipment] {
+        [
+            .barbell,
+            .machine,
+            .plateLoaded,
+            .cable,
+            .kettlebell,
+            .dumbbell,
+            .bodyweight
+        ]
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let raw = try container.decode(String.self)
+        switch raw {
+        case Equipment.barbell.rawValue, "Barbell (45 lbs)", "Barbell (25 lbs)":
+            self = .barbell
+        case Equipment.machine.rawValue, "Smith Machine (15 lbs)":
+            self = .machine
+        case Equipment.plateLoaded.rawValue:
+            self = .plateLoaded
+        case Equipment.cable.rawValue:
+            self = .cable
+        case Equipment.kettlebell.rawValue:
+            self = .kettlebell
+        case Equipment.dumbbell.rawValue:
+            self = .dumbbell
+        case Equipment.bodyweight.rawValue, "Bodyweight":
+            self = .bodyweight
+        case "Other":
+            self = .plateLoaded
+        default:
+            self = .machine
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
     
     var baseWeight: Double {
         switch self {
         case .barbell: return 45.0
-        case .barbell25: return 25.0
-        case .smithMachine: return 15.0
         default: return 0.0
         }
     }
     
     var iconName: String {
         switch self {
-        case .barbell, .barbell25: return "scalemass.fill"
-        case .smithMachine: return "building.columns.fill"
+        case .barbell: return "scalemass.fill"
         case .machine: return "gearshape.2.fill"
+        case .plateLoaded: return "rectangle.stack.fill"
         case .cable: return "arrow.triangle.2.circlepath"
         case .bodyweight: return "figure.walk"
+        case .kettlebell: return "k.circle.fill"
         case .dumbbell: return "dumbbell.fill"
-        default: return "questionmark.circle"
         }
     }
     
     // Calculates plates required per side
-    func getPlateBreakdown(for totalWeight: Double) -> String? {
-        guard self == .barbell || self == .barbell25 || self == .smithMachine else { return nil }
+    func getPlateBreakdown(for totalWeight: Double, baseWeightOverride: Double? = nil) -> String? {
+        guard self == .barbell else { return nil }
         
-        if totalWeight <= baseWeight { return "Empty Bar" }
+        let base = baseWeightOverride ?? baseWeight
+        if totalWeight <= base { return "Empty Bar" }
         
-        var remainingWeight = (totalWeight - baseWeight) / 2.0
+        var remainingWeight = (totalWeight - base) / 2.0
         let plates: [Double] = [45, 35, 25, 10, 5, 2.5]
         var breakdown: [String] = []
         
@@ -79,8 +119,8 @@ struct Exercise: Identifiable, Codable, Equatable, Sendable {
     let reps: String
     let liftType: LiftType
     let percentageOf1RM: Double?
-    let rpeOrNotes: String
-    var equipment: Equipment = .other
+    var rpeOrNotes: String
+    var equipment: Equipment = .machine
     
     func targetWeight(userProfile: UserProfile) -> Double? {
         guard let percent = percentageOf1RM else { return nil }
@@ -149,8 +189,15 @@ struct CompletedWorkout: Identifiable, Codable, Sendable {
 }
 
 extension Double {
+    // This was already there
     func rounded(to interval: Double) -> Double {
-        return (self / interval).rounded(.down) * interval
+        return (self / interval).rounded(.toNearestOrAwayFromZero) * interval
+    }
+    
+    // NEW: Add this property inside the same bracket
+    var formattedWeight: String {
+        let isInteger = self.truncatingRemainder(dividingBy: 1) == 0
+        return isInteger ? String(format: "%.0f", self) : String(format: "%.1f", self)
     }
 }
 
@@ -166,10 +213,12 @@ struct BackupData: Codable, Sendable {
     let removedDefaultExercises: [String: [String]]
     let overriddenReps: [String: String]
     let overriddenEquipment: [String: Equipment]
+    let overriddenBarbellWeights: [String: Double]
     
     // ExerciseDatabase Data
     let savedWeights: [String: Double]
     let customExercises: [String]
+    let hiddenExercises: [String]
     
     // User Profile Data
     let squatMax: Double
@@ -181,8 +230,8 @@ struct BackupData: Codable, Sendable {
     
     enum CodingKeys: String, CodingKey {
         case history, supersets, exerciseOrder, currentWeek, completedDaysByWeek
-        case addedExercises, removedDefaultExercises, overriddenReps, overriddenEquipment
-        case savedWeights, customExercises
+        case addedExercises, removedDefaultExercises, overriddenReps, overriddenEquipment, overriddenBarbellWeights
+        case savedWeights, customExercises, hiddenExercises
         case squatMax, benchMax, deadliftMax, hasOnboarded
     }
     
@@ -198,8 +247,10 @@ struct BackupData: Codable, Sendable {
         removedDefaultExercises = try container.decode([String: [String]].self, forKey: .removedDefaultExercises)
         overriddenReps = try container.decode([String: String].self, forKey: .overriddenReps)
         overriddenEquipment = try container.decode([String: Equipment].self, forKey: .overriddenEquipment)
+        overriddenBarbellWeights = try container.decodeIfPresent([String: Double].self, forKey: .overriddenBarbellWeights) ?? [:]
         savedWeights = try container.decode([String: Double].self, forKey: .savedWeights)
         customExercises = try container.decode([String].self, forKey: .customExercises)
+        hiddenExercises = try container.decodeIfPresent([String].self, forKey: .hiddenExercises) ?? []
         squatMax = try container.decode(Double.self, forKey: .squatMax)
         benchMax = try container.decode(Double.self, forKey: .benchMax)
         deadliftMax = try container.decode(Double.self, forKey: .deadliftMax)
@@ -218,8 +269,10 @@ struct BackupData: Codable, Sendable {
         try container.encode(removedDefaultExercises, forKey: .removedDefaultExercises)
         try container.encode(overriddenReps, forKey: .overriddenReps)
         try container.encode(overriddenEquipment, forKey: .overriddenEquipment)
+        try container.encode(overriddenBarbellWeights, forKey: .overriddenBarbellWeights)
         try container.encode(savedWeights, forKey: .savedWeights)
         try container.encode(customExercises, forKey: .customExercises)
+        try container.encode(hiddenExercises, forKey: .hiddenExercises)
         try container.encode(squatMax, forKey: .squatMax)
         try container.encode(benchMax, forKey: .benchMax)
         try container.encode(deadliftMax, forKey: .deadliftMax)
@@ -227,7 +280,7 @@ struct BackupData: Codable, Sendable {
     }
     
     // Memberwise initializer (required because we added a custom init(from:))
-    init(history: [CompletedWorkout], supersets: [String: [Set<String>]], exerciseOrder: [String: [String]], currentWeek: Int, completedDaysByWeek: [Int: [String]], addedExercises: [String: [Exercise]], removedDefaultExercises: [String: [String]], overriddenReps: [String: String], overriddenEquipment: [String: Equipment], savedWeights: [String: Double], customExercises: [String], squatMax: Double, benchMax: Double, deadliftMax: Double, hasOnboarded: Bool) {
+    init(history: [CompletedWorkout], supersets: [String: [Set<String>]], exerciseOrder: [String: [String]], currentWeek: Int, completedDaysByWeek: [Int: [String]], addedExercises: [String: [Exercise]], removedDefaultExercises: [String: [String]], overriddenReps: [String: String], overriddenEquipment: [String: Equipment], overriddenBarbellWeights: [String: Double], savedWeights: [String: Double], customExercises: [String], hiddenExercises: [String], squatMax: Double, benchMax: Double, deadliftMax: Double, hasOnboarded: Bool) {
         self.history = history
         self.supersets = supersets
         self.exerciseOrder = exerciseOrder
@@ -237,8 +290,10 @@ struct BackupData: Codable, Sendable {
         self.removedDefaultExercises = removedDefaultExercises
         self.overriddenReps = overriddenReps
         self.overriddenEquipment = overriddenEquipment
+        self.overriddenBarbellWeights = overriddenBarbellWeights
         self.savedWeights = savedWeights
         self.customExercises = customExercises
+        self.hiddenExercises = hiddenExercises
         self.squatMax = squatMax
         self.benchMax = benchMax
         self.deadliftMax = deadliftMax

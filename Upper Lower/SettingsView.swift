@@ -57,19 +57,19 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.edgesIgnoringSafeArea(.all)
+                Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all)
                 
                 List {
-                    Section(header: Text("Data Management").foregroundColor(.gray)) {
+                    Section(header: Text("Data Management").foregroundColor(.secondary)) {
                         Button(action: prepareExport) {
                             Label("Export Backup", systemImage: "square.and.arrow.up")
-                                .foregroundColor(.white)
+                                .foregroundColor(.primary)
                         }
                         
                         Button(action: { showFileImporter = true }) {
                             HStack {
                                 Label("Import Backup", systemImage: "square.and.arrow.down")
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.primary)
                                 if isImporting {
                                     Spacer()
                                     ProgressView()
@@ -86,10 +86,10 @@ struct SettingsView: View {
                             VStack(spacing: 8) {
                                 Text("Upper Lower 4x")
                                     .font(.headline)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.primary)
                                 Text("Developed by Slowie")
                                     .font(.footnote)
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(.secondary)
                                     .fontWeight(.medium)
                             }
                             Spacer()
@@ -136,7 +136,6 @@ struct SettingsView: View {
                 Text(alertMessage)
             }
         }
-        .preferredColorScheme(.dark)
     }
     
     // MARK: - Logic
@@ -152,8 +151,10 @@ struct SettingsView: View {
             removedDefaultExercises: workoutManager.removedDefaultExercises,
             overriddenReps: workoutManager.overriddenReps,
             overriddenEquipment: workoutManager.overriddenEquipment,
+            overriddenBarbellWeights: workoutManager.overriddenBarbellWeights,
             savedWeights: database.savedWeights,
             customExercises: database.customExercises,
+            hiddenExercises: database.hiddenExercises,
             squatMax: squatMax,
             benchMax: benchMax,
             deadliftMax: deadliftMax,
@@ -243,11 +244,15 @@ struct SettingsView: View {
         if let encodedEq = try? JSONEncoder().encode(backup.overriddenEquipment) {
             UserDefaults.standard.set(encodedEq, forKey: "overridden_equipment_schedule")
         }
+        if let encodedBarbell = try? JSONEncoder().encode(backup.overriddenBarbellWeights) {
+            UserDefaults.standard.set(encodedBarbell, forKey: "overridden_barbell_weights")
+        }
         
         if let encodedWeights = try? JSONEncoder().encode(backup.savedWeights) {
             UserDefaults.standard.set(encodedWeights, forKey: "exercise_database_weights")
         }
         UserDefaults.standard.set(backup.customExercises, forKey: "exercise_database_custom")
+        UserDefaults.standard.set(backup.hiddenExercises, forKey: "exercise_database_hidden")
         
         self.squatMax = backup.squatMax
         self.benchMax = backup.benchMax
