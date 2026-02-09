@@ -116,6 +116,7 @@ class WorkoutManager: ObservableObject {
     }
     
     func getHistory(for day: WorkoutDay) -> CompletedWorkout? {
+        guard isDayComplete(day: day) else { return nil }
         return history.last {
             let logWeek = $0.week ?? 1
             return $0.dayName == day.name && logWeek == day.week
