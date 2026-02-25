@@ -33,14 +33,14 @@ struct AddExerciseToDaySheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.edgesIgnoringSafeArea(.all)
+                Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all)
                 
                 VStack {
                     HStack {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.gray)
                         TextField("Search...", text: $searchText)
-                            .foregroundColor(.white)
+                            .foregroundColor(.primary)
                     }
                     .padding()
                     .background(Color(UIColor.systemGray6))
@@ -56,7 +56,7 @@ struct AddExerciseToDaySheet: View {
                                 }) {
                                     HStack {
                                         Text(name)
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.primary)
                                             .padding()
                                         Spacer()
                                         Image(systemName: "plus.circle")

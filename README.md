@@ -19,9 +19,61 @@ A SwiftUI iOS workout app that guides users through a 9‑week Upper/Lower progr
 - **Exercises tab**: search all exercises, per‑exercise settings, hide/delete.
 - **History tab**: calendar and session detail editing.
 
+## Requirements
+- Xcode 15+ (recommended)
+- iOS 17+ (recommended)
+- Swift 5.9+
+
+## Getting Started
+1. Open the project in Xcode:
+   - `Upper Lower.xcodeproj`
+2. Select a simulator or device.
+3. Build & run.
+
+## App Structure
+```
+Upper Lower/
+├── Upper Lower.xcodeproj
+└── Upper Lower/
+    ├── ContentView.swift
+    ├── WorkoutManager.swift
+    ├── ProgramData.swift
+    ├── Models.swift
+    ├── ExerciseDatabase.swift
+    ├── ExerciseDetailView.swift
+    ├── WorkoutDetailView.swift
+    ├── ExercisesView.swift
+    ├── HistoryView.swift
+    ├── SettingsView.swift
+    └── ...
+```
+
+### Key Components
+- **`ProgramData`**: Source of the 9‑week program structure and exercises.
+- **`WorkoutManager`**: Session state, progression, overrides, and history.
+- **`ExerciseDatabase`**: Saved weights, custom exercises, hidden exercises.
+- **`ExerciseDetailView` / `WorkoutDetailView`**: Session and exercise UI.
+- **`SettingsView`**: Backup/restore flow.
+
+## Data & Persistence
+The app persists state locally using **UserDefaults**, including:
+- Current week and completed days
+- Session state (for crash/resume)
+- History (completed workouts)
+- Exercise overrides (reps, equipment, barbell base weight)
+- Saved weights and custom exercises
+- Hidden exercises
+
 ### Backup / Restore
 - Export from **Settings → Export Backup** (JSON file).
 - Import from **Settings → Import Backup**.
+
+## Program Logic
+- **Weeks 1–9** are defined in `ProgramData`.
+- **Progression**:
+  - Completing all 4 days in a week advances the week.
+  - Week 9 completion shows a graduation prompt.
+- **%1RM weights** are calculated from user maxes and rounded to the nearest 5.
 
 ## Equipment System
 Exercises can be labeled as:
@@ -39,6 +91,17 @@ When set to **Barbell**, a “Barbell Weight” option is available (45/25/15 lb
 - **Reps and notes** can be edited per exercise.
 - **Equipment** can be changed per exercise.
 - **Exercises** can be added, removed, reordered, and grouped into supersets.
+
+## Development Notes
+- UI is SwiftUI with `@EnvironmentObject` shared state.
+- `WorkoutManager` and `ExerciseDatabase` are the primary state containers.
+- The app is designed to recover a session after backgrounding.
+
+## Roadmap Ideas
+- Cloud sync
+- Unit/UI tests
+- Export to CSV
+- Dynamic program builder
 
 ## License
 This project is private to its owner unless otherwise specified.

@@ -38,6 +38,8 @@ class WorkoutManager: ObservableObject {
     @Published var overriddenEquipment: [String: Equipment] = [:]
     @Published var overriddenNotes: [String: String] = [:]
     @Published var overriddenBarbellWeights: [String: Double] = [:]
+    @Published var overriddenProgressionAmounts: [String: Double] = [:]
+    @Published var overriddenRestTimerDurations: [String: Int] = [:]
     
     // Exercise Order Persistence
     @Published var exerciseOrder: [String: [String]] = [:]
@@ -289,12 +291,72 @@ class WorkoutManager: ObservableObject {
         return overriddenBarbellWeights[exerciseName] ?? defaultWeight
     }
 
+    func updateProgressionAmount(for exerciseName: String, to amount: Double) {
+        overriddenProgressionAmounts[exerciseName] = max(0, amount)
+        saveScheduleModifications()
+    }
+
+    func clearProgressionAmountOverride(for exerciseName: String) {
+        if overriddenProgressionAmounts.removeValue(forKey: exerciseName) != nil {
+            saveScheduleModifications()
+        }
+    }
+
+    func isProgressionAmountOverridden(for exerciseName: String) -> Bool {
+        overriddenProgressionAmounts[exerciseName] != nil
+    }
+
+    func getProgressionAmount(for exerciseName: String, equipment: Equipment) -> Double {
+        return overriddenProgressionAmounts[exerciseName] ?? defaultProgressionAmount(for: equipment)
+    }
+
+    private func defaultProgressionAmount(for equipment: Equipment) -> Double {
+        if equipment == .barbell || equipment == .plateLoaded {
+            return 2.5
+        }
+        return 5.0
+    }
+
+    func updateRestTimerDuration(for exerciseName: String, to duration: Int) {
+        overriddenRestTimerDurations[exerciseName] = max(0, duration)
+        saveScheduleModifications()
+    }
+
+    func clearRestTimerDurationOverride(for exerciseName: String) {
+        if overriddenRestTimerDurations.removeValue(forKey: exerciseName) != nil {
+            saveScheduleModifications()
+        }
+    }
+
+    func isRestTimerDurationOverridden(for exerciseName: String) -> Bool {
+        overriddenRestTimerDurations[exerciseName] != nil
+    }
+
+    func getRestTimerDuration(for exercise: Exercise) -> Int {
+        overriddenRestTimerDurations[exercise.name] ?? defaultRestTimerDuration(for: exercise)
+    }
+
+    func getDefaultRestTimerDuration(for exercise: Exercise) -> Int {
+        defaultRestTimerDuration(for: exercise)
+    }
+
+    private func defaultRestTimerDuration(for exercise: Exercise) -> Int {
+        if exercise.percentageOf1RM != nil {
+            return 180
+        }
+        let isInclineBench = exercise.name.localizedCaseInsensitiveContains("incline bench press")
+            || exercise.name.localizedCaseInsensitiveContains("barbell incline press")
+        return isInclineBench ? 180 : 90
+    }
+
     func clearOverrides(for exerciseName: String) {
         let didRemove = overriddenReps.removeValue(forKey: exerciseName) != nil
         let didRemoveEq = overriddenEquipment.removeValue(forKey: exerciseName) != nil
         let didRemoveNotes = overriddenNotes.removeValue(forKey: exerciseName) != nil
         let didRemoveBarbell = overriddenBarbellWeights.removeValue(forKey: exerciseName) != nil
-        if didRemove || didRemoveEq || didRemoveNotes || didRemoveBarbell {
+        let didRemoveProgression = overriddenProgressionAmounts.removeValue(forKey: exerciseName) != nil
+        let didRemoveRestTimer = overriddenRestTimerDurations.removeValue(forKey: exerciseName) != nil
+        if didRemove || didRemoveEq || didRemoveNotes || didRemoveBarbell || didRemoveProgression || didRemoveRestTimer {
             saveScheduleModifications()
         }
     }
@@ -539,7 +601,10 @@ class WorkoutManager: ObservableObject {
             
             if allSetsMetTarget {
                 if let lastSetWeight = loggedData.sets.last?.weight {
-                    let newWeight = lastSetWeight + 5.0
+                    let effectiveEquipment = getEquipment(for: planned.name, defaultEquipment: planned.equipment)
+                    let progressionAmount = getProgressionAmount(for: planned.name, equipment: effectiveEquipment)
+                    guard progressionAmount > 0 else { continue }
+                    let newWeight = lastSetWeight + progressionAmount
                     database.saveWeight(for: planned.name, weight: newWeight)
                 }
             }
@@ -669,6 +734,12 @@ class WorkoutManager: ObservableObject {
         if let encodedBarbell = try? JSONEncoder().encode(overriddenBarbellWeights) {
             UserDefaults.standard.set(encodedBarbell, forKey: "overridden_barbell_weights")
         }
+        if let encodedProgression = try? JSONEncoder().encode(overriddenProgressionAmounts) {
+            UserDefaults.standard.set(encodedProgression, forKey: "overridden_progression_amounts_schedule")
+        }
+        if let encodedRestTimer = try? JSONEncoder().encode(overriddenRestTimerDurations) {
+            UserDefaults.standard.set(encodedRestTimer, forKey: "overridden_rest_timers_schedule")
+        }
     }
     
     private func loadScheduleModifications() {
@@ -695,6 +766,14 @@ class WorkoutManager: ObservableObject {
         if let dataBarbell = UserDefaults.standard.data(forKey: "overridden_barbell_weights"),
             let decodedBarbell = try? JSONDecoder().decode([String: Double].self, from: dataBarbell) {
             overriddenBarbellWeights = decodedBarbell
+        }
+        if let dataProgression = UserDefaults.standard.data(forKey: "overridden_progression_amounts_schedule"),
+            let decodedProgression = try? JSONDecoder().decode([String: Double].self, from: dataProgression) {
+            overriddenProgressionAmounts = decodedProgression
+        }
+        if let dataRestTimer = UserDefaults.standard.data(forKey: "overridden_rest_timers_schedule"),
+            let decodedRestTimer = try? JSONDecoder().decode([String: Int].self, from: dataRestTimer) {
+            overriddenRestTimerDurations = decodedRestTimer
         }
     }
     

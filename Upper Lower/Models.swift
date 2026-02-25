@@ -80,10 +80,20 @@ enum Equipment: String, Codable, CaseIterable, Equatable, Sendable {
     
     // Calculates plates required per side
     func getPlateBreakdown(for totalWeight: Double, baseWeightOverride: Double? = nil) -> String? {
-        guard self == .barbell else { return nil }
-        
-        let base = baseWeightOverride ?? baseWeight
-        if totalWeight <= base { return "Empty Bar" }
+        let base: Double
+        let emptyLabel: String
+        switch self {
+        case .barbell:
+            base = baseWeightOverride ?? baseWeight
+            emptyLabel = "Empty Bar"
+        case .plateLoaded:
+            base = 0
+            emptyLabel = "No Plates"
+        default:
+            return nil
+        }
+
+        if totalWeight <= base { return emptyLabel }
         
         var remainingWeight = (totalWeight - base) / 2.0
         let plates: [Double] = [45, 35, 25, 10, 5, 2.5]
@@ -214,6 +224,8 @@ struct BackupData: Codable, Sendable {
     let overriddenReps: [String: String]
     let overriddenEquipment: [String: Equipment]
     let overriddenBarbellWeights: [String: Double]
+    let overriddenProgressionAmounts: [String: Double]
+    let overriddenRestTimerDurations: [String: Int]
     
     // ExerciseDatabase Data
     let savedWeights: [String: Double]
@@ -230,7 +242,7 @@ struct BackupData: Codable, Sendable {
     
     enum CodingKeys: String, CodingKey {
         case history, supersets, exerciseOrder, currentWeek, completedDaysByWeek
-        case addedExercises, removedDefaultExercises, overriddenReps, overriddenEquipment, overriddenBarbellWeights
+        case addedExercises, removedDefaultExercises, overriddenReps, overriddenEquipment, overriddenBarbellWeights, overriddenProgressionAmounts, overriddenRestTimerDurations
         case savedWeights, customExercises, hiddenExercises
         case squatMax, benchMax, deadliftMax, hasOnboarded
     }
@@ -248,6 +260,8 @@ struct BackupData: Codable, Sendable {
         overriddenReps = try container.decode([String: String].self, forKey: .overriddenReps)
         overriddenEquipment = try container.decode([String: Equipment].self, forKey: .overriddenEquipment)
         overriddenBarbellWeights = try container.decodeIfPresent([String: Double].self, forKey: .overriddenBarbellWeights) ?? [:]
+        overriddenProgressionAmounts = try container.decodeIfPresent([String: Double].self, forKey: .overriddenProgressionAmounts) ?? [:]
+        overriddenRestTimerDurations = try container.decodeIfPresent([String: Int].self, forKey: .overriddenRestTimerDurations) ?? [:]
         savedWeights = try container.decode([String: Double].self, forKey: .savedWeights)
         customExercises = try container.decode([String].self, forKey: .customExercises)
         hiddenExercises = try container.decodeIfPresent([String].self, forKey: .hiddenExercises) ?? []
@@ -270,6 +284,8 @@ struct BackupData: Codable, Sendable {
         try container.encode(overriddenReps, forKey: .overriddenReps)
         try container.encode(overriddenEquipment, forKey: .overriddenEquipment)
         try container.encode(overriddenBarbellWeights, forKey: .overriddenBarbellWeights)
+        try container.encode(overriddenProgressionAmounts, forKey: .overriddenProgressionAmounts)
+        try container.encode(overriddenRestTimerDurations, forKey: .overriddenRestTimerDurations)
         try container.encode(savedWeights, forKey: .savedWeights)
         try container.encode(customExercises, forKey: .customExercises)
         try container.encode(hiddenExercises, forKey: .hiddenExercises)
@@ -280,7 +296,7 @@ struct BackupData: Codable, Sendable {
     }
     
     // Memberwise initializer (required because we added a custom init(from:))
-    init(history: [CompletedWorkout], supersets: [String: [Set<String>]], exerciseOrder: [String: [String]], currentWeek: Int, completedDaysByWeek: [Int: [String]], addedExercises: [String: [Exercise]], removedDefaultExercises: [String: [String]], overriddenReps: [String: String], overriddenEquipment: [String: Equipment], overriddenBarbellWeights: [String: Double], savedWeights: [String: Double], customExercises: [String], hiddenExercises: [String], squatMax: Double, benchMax: Double, deadliftMax: Double, hasOnboarded: Bool) {
+    init(history: [CompletedWorkout], supersets: [String: [Set<String>]], exerciseOrder: [String: [String]], currentWeek: Int, completedDaysByWeek: [Int: [String]], addedExercises: [String: [Exercise]], removedDefaultExercises: [String: [String]], overriddenReps: [String: String], overriddenEquipment: [String: Equipment], overriddenBarbellWeights: [String: Double], overriddenProgressionAmounts: [String: Double], overriddenRestTimerDurations: [String: Int], savedWeights: [String: Double], customExercises: [String], hiddenExercises: [String], squatMax: Double, benchMax: Double, deadliftMax: Double, hasOnboarded: Bool) {
         self.history = history
         self.supersets = supersets
         self.exerciseOrder = exerciseOrder
@@ -291,6 +307,8 @@ struct BackupData: Codable, Sendable {
         self.overriddenReps = overriddenReps
         self.overriddenEquipment = overriddenEquipment
         self.overriddenBarbellWeights = overriddenBarbellWeights
+        self.overriddenProgressionAmounts = overriddenProgressionAmounts
+        self.overriddenRestTimerDurations = overriddenRestTimerDurations
         self.savedWeights = savedWeights
         self.customExercises = customExercises
         self.hiddenExercises = hiddenExercises

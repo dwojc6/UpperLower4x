@@ -61,10 +61,10 @@ struct CalendarView: View {
                         .foregroundColor(.green)
                 }
                 Spacer()
-                Text(currentMonth.formatted(.dateTime.month(.wide).year()))
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
+                 Text(currentMonth.formatted(.dateTime.month(.wide).year()))
+                     .font(.headline)
+                     .fontWeight(.bold)
+                     .foregroundColor(.primary)
                 Spacer()
                 Button(action: { changeMonth(by: 1) }) {
                     Image(systemName: "chevron.right")
@@ -144,16 +144,16 @@ struct CalendarView: View {
     }
     
     func textColor(isSelected: Bool, isWorkoutDay: Bool, isToday: Bool, isCurrentMonth: Bool) -> Color {
-        if isSelected { return .black }
-        if isWorkoutDay { return .white } // Workout days now have White text (on Green circle)
+        if isSelected { return .primary }
+        if isWorkoutDay { return .primary } // Workout days now have primary text (on Green circle)
         if isToday { return .green }      // "Today" keeps Green text if no workout
-        return isCurrentMonth ? .white : .gray.opacity(0.4)
+        return isCurrentMonth ? .primary : .secondary.opacity(0.4)
     }
     
     @ViewBuilder
     func backgroundView(isSelected: Bool, isWorkoutDay: Bool) -> some View {
         if isSelected {
-            Circle().fill(Color.white)
+            Circle().fill(Color(UIColor.secondarySystemBackground))
         } else if isWorkoutDay {
             Circle().fill(Color.green) // Green Circle for workouts
         } else {

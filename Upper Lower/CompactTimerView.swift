@@ -37,7 +37,7 @@ struct CompactTimerView: View {
                         Text(timeString(time: timeRemaining))
                             .font(.system(.title3, design: .monospaced))
                             .fontWeight(.bold)
-                            .foregroundColor(isPaused ? .yellow : .white)
+                            .foregroundColor(isPaused ? .yellow : .primary)
                     }
                 }
             }
@@ -50,7 +50,7 @@ struct CompactTimerView: View {
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
                         .background(Color.white.opacity(0.1))
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                         .cornerRadius(20)
                 }
                 Button(action: onSkip) {

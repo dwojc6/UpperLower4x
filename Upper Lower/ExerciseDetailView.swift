@@ -450,7 +450,7 @@ struct ExerciseDetailView: View {
                 )
                 
                 if exercise.id == exercises.last?.id {
-                    workoutManager.startRestTimer()
+                    workoutManager.startRestTimer(duration: workoutManager.getRestTimerDuration(for: exercise))
                 }
                 
                 checkCompletionAndDismiss()

@@ -210,17 +210,48 @@ struct ExerciseSettingsView: View {
     
     @State private var selectedEquipment: Equipment = .machine
     @State private var barbellBaseWeight: Double = 45
+    @State private var restTimerDurationSeconds: Int = 90
+    @State private var didInitializeRestTimer = false
     @State private var showWeightAlert = false
+    @State private var showProgressionAlert = false
     @State private var weightInput = ""
+    @State private var progressionInput = ""
     
-    var defaultEquipment: Equipment {
+    var defaultProgramExercise: Exercise? {
         for week in 1...9 {
             let days = ProgramData.shared.getDays(forWeek: week)
             if let match = days.flatMap({ $0.exercises }).first(where: { $0.name == name }) {
-                return match.equipment
+                return match
             }
         }
-        return .machine
+        return nil
+    }
+
+    var defaultEquipment: Equipment {
+        defaultProgramExercise?.equipment ?? .machine
+    }
+
+    var settingsExercise: Exercise {
+        if let fromProgram = defaultProgramExercise {
+            return Exercise(
+                name: fromProgram.name,
+                sets: fromProgram.sets,
+                reps: fromProgram.reps,
+                liftType: fromProgram.liftType,
+                percentageOf1RM: fromProgram.percentageOf1RM,
+                rpeOrNotes: fromProgram.rpeOrNotes,
+                equipment: selectedEquipment
+            )
+        }
+        return Exercise(
+            name: name,
+            sets: 1,
+            reps: "10",
+            liftType: .accessory,
+            percentageOf1RM: nil,
+            rpeOrNotes: "",
+            equipment: selectedEquipment
+        )
     }
     
     var currentEquipment: Equipment {
@@ -229,6 +260,18 @@ struct ExerciseSettingsView: View {
     
     var currentWeight: Double? {
         database.getWeight(for: name)
+    }
+
+    var currentProgressionAmount: Double {
+        workoutManager.getProgressionAmount(for: name, equipment: selectedEquipment)
+    }
+
+    var currentRestTimerDurationSeconds: Int {
+        workoutManager.getRestTimerDuration(for: settingsExercise)
+    }
+
+    var defaultRestTimerDurationSeconds: Int {
+        workoutManager.getDefaultRestTimerDuration(for: settingsExercise)
     }
     
     var body: some View {
@@ -261,6 +304,44 @@ struct ExerciseSettingsView: View {
                     }
                 }
             }
+
+            Section(header: Text("Auto Progression")) {
+                HStack {
+                    Text("Amount")
+                    Spacer()
+                    Text("\(currentProgressionAmount.formattedWeight) lbs")
+                        .foregroundColor(.secondary)
+                }
+
+                Button("Change Amount") {
+                    progressionInput = currentProgressionAmount.formattedWeight
+                    showProgressionAlert = true
+                }
+
+                if workoutManager.isProgressionAmountOverridden(for: name) {
+                    Button("Reset to Default", role: .destructive) {
+                        workoutManager.clearProgressionAmountOverride(for: name)
+                    }
+                }
+            }
+
+            Section(header: Text("Rest Timer")) {
+                HStack {
+                    Text("Duration")
+                    Spacer()
+                    Text(formatDuration(restTimerDurationSeconds))
+                        .foregroundColor(.secondary)
+                }
+
+                Stepper("Adjust Duration", value: $restTimerDurationSeconds, in: 30...600, step: 15)
+
+                if workoutManager.isRestTimerDurationOverridden(for: name) {
+                    Button("Reset to Default", role: .destructive) {
+                        workoutManager.clearRestTimerDurationOverride(for: name)
+                        restTimerDurationSeconds = defaultRestTimerDurationSeconds
+                    }
+                }
+            }
             
             if selectedEquipment == .barbell {
                 Section(header: Text("Barbell Weight")) {
@@ -278,6 +359,8 @@ struct ExerciseSettingsView: View {
         .onAppear {
             selectedEquipment = currentEquipment
             barbellBaseWeight = workoutManager.getBarbellBaseWeight(for: name, defaultWeight: Equipment.barbell.baseWeight)
+            restTimerDurationSeconds = currentRestTimerDurationSeconds
+            didInitializeRestTimer = true
         }
         .onChange(of: selectedEquipment) { _, newValue in
             workoutManager.updateEquipment(for: name, to: newValue)
@@ -287,6 +370,14 @@ struct ExerciseSettingsView: View {
         }
         .onChange(of: barbellBaseWeight) { _, newValue in
             workoutManager.updateBarbellBaseWeight(for: name, to: newValue)
+        }
+        .onChange(of: restTimerDurationSeconds) { _, newValue in
+            guard didInitializeRestTimer else { return }
+            if newValue == defaultRestTimerDurationSeconds {
+                workoutManager.clearRestTimerDurationOverride(for: name)
+            } else {
+                workoutManager.updateRestTimerDuration(for: name, to: newValue)
+            }
         }
         .alert("Set Weight", isPresented: $showWeightAlert) {
             TextField("Weight", text: $weightInput)
@@ -300,5 +391,23 @@ struct ExerciseSettingsView: View {
         } message: {
             Text("Enter the weight for this exercise.")
         }
+        .alert("Auto Progression Amount", isPresented: $showProgressionAlert) {
+            TextField("Amount", text: $progressionInput)
+                .keyboardType(.decimalPad)
+            Button("Save") {
+                if let value = Double(progressionInput) {
+                    workoutManager.updateProgressionAmount(for: name, to: value)
+                }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("How many pounds should this exercise increase when progression triggers?")
+        }
+    }
+
+    func formatDuration(_ seconds: Int) -> String {
+        let minutes = seconds / 60
+        let remainder = seconds % 60
+        return String(format: "%d:%02d", minutes, remainder)
     }
 }

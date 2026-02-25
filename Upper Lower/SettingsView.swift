@@ -53,6 +53,12 @@ struct SettingsView: View {
     @State private var alertMessage = ""
     @State private var showAlert = false
     @State private var isImporting = false
+
+    var appVersionText: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "Unknown"
+        return "\(version)"
+    }
     
     var body: some View {
         NavigationStack {
@@ -91,6 +97,9 @@ struct SettingsView: View {
                                     .font(.footnote)
                                     .foregroundColor(.secondary)
                                     .fontWeight(.medium)
+                                Text("Version \(appVersionText)")
+                                    .font(.footnote)
+                                    .foregroundColor(.secondary)
                             }
                             Spacer()
                         }
@@ -152,6 +161,8 @@ struct SettingsView: View {
             overriddenReps: workoutManager.overriddenReps,
             overriddenEquipment: workoutManager.overriddenEquipment,
             overriddenBarbellWeights: workoutManager.overriddenBarbellWeights,
+            overriddenProgressionAmounts: workoutManager.overriddenProgressionAmounts,
+            overriddenRestTimerDurations: workoutManager.overriddenRestTimerDurations,
             savedWeights: database.savedWeights,
             customExercises: database.customExercises,
             hiddenExercises: database.hiddenExercises,
@@ -246,6 +257,12 @@ struct SettingsView: View {
         }
         if let encodedBarbell = try? JSONEncoder().encode(backup.overriddenBarbellWeights) {
             UserDefaults.standard.set(encodedBarbell, forKey: "overridden_barbell_weights")
+        }
+        if let encodedProgression = try? JSONEncoder().encode(backup.overriddenProgressionAmounts) {
+            UserDefaults.standard.set(encodedProgression, forKey: "overridden_progression_amounts_schedule")
+        }
+        if let encodedRestTimers = try? JSONEncoder().encode(backup.overriddenRestTimerDurations) {
+            UserDefaults.standard.set(encodedRestTimers, forKey: "overridden_rest_timers_schedule")
         }
         
         if let encodedWeights = try? JSONEncoder().encode(backup.savedWeights) {

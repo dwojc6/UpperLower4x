@@ -23,8 +23,8 @@ struct HistoryView: View {
     
     var body: some View {
         ZStack {
-            Color.black.edgesIgnoringSafeArea(.all)
-            
+            Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all)
+
             VStack {
                 // Custom Calendar Grid
                 CalendarView(selectedDate: $selectedDate, workoutDates: workoutDates)
@@ -51,7 +51,7 @@ struct HistoryView: View {
                                 
                                 HistoryCard(workout: workout)
                             }
-                            .listRowBackground(Color.black)
+                            .listRowBackground(Color(UIColor.systemBackground))
                             .listRowSeparator(.hidden)
                             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -107,16 +107,16 @@ struct SessionDetailView: View {
     
     var body: some View {
         ZStack {
-            Color.black.edgesIgnoringSafeArea(.all)
-            
+            Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all)
+
             ScrollView {
                 VStack(spacing: 24) {
                     // Header
                     VStack(spacing: 8) {
-                        Text(liveWorkout.dayName.uppercased())
-                            .font(.largeTitle)
-                            .fontWeight(.heavy)
-                            .foregroundColor(.white)
+                         Text(liveWorkout.dayName.uppercased())
+                             .font(.largeTitle)
+                             .fontWeight(.heavy)
+                             .foregroundColor(.primary)
                         
                         Text(liveWorkout.startTime.formatted(date: .long, time: .omitted))
                             .font(.subheadline)
@@ -166,9 +166,9 @@ struct SessionDetailView: View {
                     } else {
                         ForEach(liveWorkout.exercises) { exercise in
                             VStack(alignment: .leading, spacing: 12) {
-                                Text(exercise.name)
-                                    .font(.headline)
-                                    .foregroundColor(.white)
+                                 Text(exercise.name)
+                                     .font(.headline)
+                                     .foregroundColor(.primary)
                                 
                                 ForEach(exercise.sets) { set in
                                     HStack {
@@ -279,10 +279,10 @@ struct HistoryCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(workout.dayName.uppercased())
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
+                 Text(workout.dayName.uppercased())
+                     .font(.headline)
+                     .fontWeight(.bold)
+                     .foregroundColor(.primary)
                 
                 Spacer()
                 
@@ -292,7 +292,7 @@ struct HistoryCard: View {
                     .foregroundColor(.gray)
             }
             
-            Divider().background(Color.gray)
+            Divider().background(Color.secondary)
             
             HStack {
                 VStack(alignment: .leading) {
@@ -310,9 +310,9 @@ struct HistoryCard: View {
                     Text("Exercises")
                         .font(.caption)
                         .foregroundColor(.gray)
-                    Text("\(workout.exercises.count)")
-                        .font(.headline)
-                        .foregroundColor(.white)
+                     Text("\(workout.exercises.count)")
+                         .font(.headline)
+                         .foregroundColor(.primary)
                 }
             }
         }

@@ -186,6 +186,12 @@ struct OnboardingView: View {
         if let encodedBarbell = try? JSONEncoder().encode(backup.overriddenBarbellWeights) {
             UserDefaults.standard.set(encodedBarbell, forKey: "overridden_barbell_weights")
         }
+        if let encodedProgression = try? JSONEncoder().encode(backup.overriddenProgressionAmounts) {
+            UserDefaults.standard.set(encodedProgression, forKey: "overridden_progression_amounts_schedule")
+        }
+        if let encodedRestTimers = try? JSONEncoder().encode(backup.overriddenRestTimerDurations) {
+            UserDefaults.standard.set(encodedRestTimers, forKey: "overridden_rest_timers_schedule")
+        }
         if let encodedWeights = try? JSONEncoder().encode(backup.savedWeights) {
             UserDefaults.standard.set(encodedWeights, forKey: "exercise_database_weights")
         }
