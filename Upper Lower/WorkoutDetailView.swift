@@ -48,11 +48,6 @@ struct WorkoutDetailView: View {
     // Gap between button top and triangle tip
     @ScaledMetric var menuGap: CGFloat = 7
     
-    var alertBottomPadding: CGFloat {
-        // Calculate dynamic position: Button Height + Bottom Padding + Gap
-        return endButtonHeight + endButtonBottomPadding + menuGap
-    }
-    
     // Computed: Find history for this specific day/week
     var historicalWorkout: CompletedWorkout? {
         workoutManager.getHistory(for: day)
@@ -64,38 +59,35 @@ struct WorkoutDetailView: View {
     }
     
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack {
             Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all)
             
-            // 1. Main Content List
+            // Main Content List
             contentList
             
-            // 2. Pinned End Workout Button
-            if isSessionView && workoutManager.isSessionActive {
-                pinnedEndWorkoutButton
-                    .transition(.opacity)
-                    .zIndex(1)
-            }
-            
-            // 3. Custom Save/Discard Alert Overlay
+            // Custom Save/Discard Alert Overlay
             if showEndWorkoutAlert {
-                Color.clear
+                Color.black.opacity(0.001)
                     .contentShape(Rectangle())
                     .edgesIgnoringSafeArea(.all)
                     .onTapGesture {
-                        withAnimation { showEndWorkoutAlert = false }
+                        showEndWorkoutAlert = false
                     }
-                    .transition(.opacity)
                     .zIndex(2)
-                
-                VStack {
-                    Spacer()
-                    customSaveAlert
-                        .padding(.bottom, alertBottomPadding) // Adaptive padding
-                        .transition(.scale(scale: 0.1, anchor: .bottom).combined(with: .opacity))
+            }
+
+            if isSessionView && workoutManager.isSessionActive && showEndWorkoutAlert {
+                GeometryReader { proxy in
+                    Color.clear
+                        .overlay(alignment: .bottom) {
+                            customSaveAlert
+                                .padding(.bottom, menuGap)
+                        }
+                        .frame(width: proxy.size.width, height: proxy.size.height)
                 }
                 .zIndex(3)
             }
+
         }
         .onAppear {
             loadAndSortExercises()
@@ -105,6 +97,12 @@ struct WorkoutDetailView: View {
         .onChange(of: workoutManager.removedDefaultExercises[scheduleKey]) { _, _ in loadAndSortExercises() }
         .onChange(of: workoutManager.exerciseOrder[day.name]) { _, _ in loadAndSortExercises() }
         .onChange(of: workoutManager.overriddenEquipment) { _, _ in loadAndSortExercises() }
+        
+        .safeAreaInset(edge: .bottom) {
+            if isSessionView && workoutManager.isSessionActive {
+                pinnedEndWorkoutButton
+            }
+        }
         
         // Pass local edit mode state to environment
         .environment(\.editMode, $editMode)
@@ -205,11 +203,9 @@ struct WorkoutDetailView: View {
                 VStack(spacing: 10) {
                     // Save Button
                     Button(action: {
-                        withAnimation {
-                            workoutManager.endSession(save: true, database: database)
-                            showEndWorkoutAlert = false
-                            dismiss()
-                        }
+                        workoutManager.endSession(save: true, database: database)
+                        showEndWorkoutAlert = false
+                        dismiss()
                     }) {
                         Text("Save Workout")
                             .font(.headline)
@@ -223,11 +219,9 @@ struct WorkoutDetailView: View {
                     
                     // Discard Button
                     Button(action: {
-                        withAnimation {
-                            workoutManager.endSession(save: false)
-                            showEndWorkoutAlert = false
-                            dismiss()
-                        }
+                        workoutManager.endSession(save: false)
+                        showEndWorkoutAlert = false
+                        dismiss()
                     }) {
                         Text("Discard Workout")
                             .font(.headline)
@@ -279,14 +273,6 @@ struct WorkoutDetailView: View {
         List {
             headerSection
             exercisesListSection
-            
-            // Spacer for Pinned Button
-            if isSessionView && workoutManager.isSessionActive {
-                Color.clear
-                    .frame(height: endButtonHeight + endButtonBottomPadding + 20)
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-            }
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
@@ -348,28 +334,31 @@ struct WorkoutDetailView: View {
     
     // Pinned button implementation
     var pinnedEndWorkoutButton: some View {
-        VStack {
-            Button(action: {
-                withAnimation {
-                    showEndWorkoutAlert = true
-                }
-            }) {
-                Text("End workout")
-                    .font(.subheadline)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: endButtonHeight) // ADAPTIVE
-                    .background(Color.red)
-                    .clipShape(Capsule()) // Replaces fixed cornerRadius for perfect pill
-            }
-            .padding(.horizontal, 40)
-            .padding(.bottom, endButtonBottomPadding) // ADAPTIVE
+        Button(action: {
+            showEndWorkoutAlert = true
+        }) {
+            Text("End workout")
+                .font(.subheadline)
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: endButtonHeight)
+                .background(Color.red)
+                .clipShape(Capsule())
         }
+        .padding(.horizontal, 40)
+        .padding(.bottom, endButtonBottomPadding)
         .background(
-            LinearGradient(colors: [Color(UIColor.systemBackground).opacity(0), Color(UIColor.systemBackground)], startPoint: .top, endPoint: .bottom)
-                .frame(height: endButtonHeight + endButtonBottomPadding + 20)
-                .padding(.top, -20)
+            Color(UIColor.systemBackground)
+                .overlay(alignment: .top) {
+                    LinearGradient(
+                        colors: [Color(UIColor.systemBackground).opacity(0), Color(UIColor.systemBackground)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: 20)
+                }
+                .ignoresSafeArea()
         )
     }
     

@@ -249,7 +249,6 @@ struct SessionDetailView: View {
                     }
                 }
             }
-            .preferredColorScheme(.dark)
         }
     }
     

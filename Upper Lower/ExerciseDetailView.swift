@@ -48,7 +48,7 @@ struct ExerciseDetailView: View {
     }
     
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack {
             Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all)
             
             VStack {
@@ -87,11 +87,11 @@ struct ExerciseDetailView: View {
                         }
                         workingSetsSection
                     }
-                    .padding(.bottom, 100)
+                    .padding(.bottom, 24)
                 }
             }
-            
-            // Rest Timer Overlay
+        }
+        .safeAreaInset(edge: .bottom) {
             if isSessionView && workoutManager.isRestTimerActive && !workoutManager.isCurrentSessionComplete {
                 CompactTimerView(
                     timeRemaining: $workoutManager.restTimeRemaining,
@@ -100,7 +100,8 @@ struct ExerciseDetailView: View {
                     onSkip: { workoutManager.skipRestTimer() },
                     onPause: { workoutManager.toggleRestTimerPause() }
                 )
-                .padding(.horizontal).padding(.bottom, 20)
+                .padding(.horizontal)
+                .padding(.bottom, 8)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
