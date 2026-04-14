@@ -35,6 +35,127 @@ struct BackupDocument: FileDocument {
     }
 }
 
+// MARK: - CSV Document Helper
+struct CompletedLiftsCSVDocument: FileDocument {
+    nonisolated(unsafe) static var readableContentTypes: [UTType] {
+        [UTType(filenameExtension: "csv") ?? .plainText]
+    }
+
+    let csvText: String
+
+    init(history: [CompletedWorkout]) {
+        self.csvText = Self.makeCSV(from: history)
+    }
+
+    init(configuration: ReadConfiguration) throws {
+        guard let data = configuration.file.regularFileContents,
+              let csvText = String(data: data, encoding: .utf8) else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+        self.csvText = csvText
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: Data(csvText.utf8))
+    }
+
+    static func hasCompletedLifts(in history: [CompletedWorkout]) -> Bool {
+        history.contains { workout in
+            workout.exercises.contains { exercise in
+                exercise.sets.contains(where: \.isCompleted)
+            }
+        }
+    }
+
+    private static func makeCSV(from history: [CompletedWorkout]) -> String {
+        let headers = [
+            "session_date",
+            "session_start_time",
+            "session_end_time",
+            "day_name",
+            "week",
+            "exercise_name",
+            "set_number",
+            "reps",
+            "weight_lbs",
+            "logged_at"
+        ]
+
+        var lines = [headers.joined(separator: ",")]
+        let sortedHistory = history.sorted { $0.startTime < $1.startTime }
+
+        for workout in sortedHistory {
+            let sessionDate = csvDateFormatter.string(from: workout.startTime)
+            let sessionStart = csvTimeFormatter.string(from: workout.startTime)
+            let sessionEnd = workout.endTime.map { csvTimeFormatter.string(from: $0) } ?? ""
+            let week = workout.week.map(String.init) ?? ""
+
+            for exercise in workout.exercises {
+                let completedSets = exercise.sets
+                    .filter(\.isCompleted)
+                    .sorted { lhs, rhs in
+                        if lhs.setNumber != rhs.setNumber {
+                            return lhs.setNumber < rhs.setNumber
+                        }
+                        return lhs.timestamp < rhs.timestamp
+                    }
+
+                for set in completedSets {
+                    let fields = [
+                        sessionDate,
+                        sessionStart,
+                        sessionEnd,
+                        workout.dayName,
+                        week,
+                        exercise.name,
+                        String(set.setNumber),
+                        set.reps,
+                        set.weight.formattedWeight,
+                        csvDateTimeFormatter.string(from: set.timestamp)
+                    ]
+
+                    lines.append(fields.map(escapeCSVField).joined(separator: ","))
+                }
+            }
+        }
+
+        return lines.joined(separator: "\n")
+    }
+
+    private static func escapeCSVField(_ value: String) -> String {
+        let escapedValue = value.replacingOccurrences(of: "\"", with: "\"\"")
+        if escapedValue.contains(",") || escapedValue.contains("\"") || escapedValue.contains("\n") {
+            return "\"\(escapedValue)\""
+        }
+        return escapedValue
+    }
+
+    private static let csvDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
+
+    private static let csvTimeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = .current
+        formatter.dateFormat = "HH:mm:ss"
+        return formatter
+    }()
+
+    private static let csvDateTimeFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.timeZone = .current
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
+    }()
+}
+
 // MARK: - Settings View
 struct SettingsView: View {
     @EnvironmentObject var workoutManager: WorkoutManager
@@ -48,8 +169,10 @@ struct SettingsView: View {
     @AppStorage("hasOnboarded") var hasOnboarded: Bool = false
     
     @State private var showFileExporter = false
+    @State private var showCSVExporter = false
     @State private var showFileImporter = false
     @State private var backupDocument: BackupDocument?
+    @State private var completedLiftsDocument: CompletedLiftsCSVDocument?
     @State private var alertMessage = ""
     @State private var showAlert = false
     @State private var isImporting = false
@@ -69,6 +192,11 @@ struct SettingsView: View {
                     Section(header: Text("Data Management").foregroundColor(.secondary)) {
                         Button(action: prepareExport) {
                             Label("Export Backup", systemImage: "square.and.arrow.up")
+                                .foregroundColor(.primary)
+                        }
+
+                        Button(action: prepareCompletedLiftsExport) {
+                            Label("Export Completed Lifts", systemImage: "tablecells")
                                 .foregroundColor(.primary)
                         }
                         
@@ -130,6 +258,20 @@ struct SettingsView: View {
                     showAlert = true
                 }
             }
+            .fileExporter(
+                isPresented: $showCSVExporter,
+                document: completedLiftsDocument,
+                contentType: UTType(filenameExtension: "csv") ?? .plainText,
+                defaultFilename: "UpperLower_CompletedLifts_\(Date().formatted(date: .numeric, time: .omitted).replacingOccurrences(of: "/", with: "-"))"
+            ) { result in
+                switch result {
+                case .success(let url):
+                    print("Saved CSV to \(url)")
+                case .failure(let error):
+                    alertMessage = "CSV export failed: \(error.localizedDescription)"
+                    showAlert = true
+                }
+            }
             // IMPORT HANDLER
             .sheet(isPresented: $showFileImporter) {
                 DocumentPicker(onPick: { url in
@@ -139,7 +281,7 @@ struct SettingsView: View {
                     showAlert = true
                 })
             }
-            .alert("Backup", isPresented: $showAlert) {
+            .alert("Data Management", isPresented: $showAlert) {
                 Button("OK", role: .cancel) { }
             } message: {
                 Text(alertMessage)
@@ -174,6 +316,17 @@ struct SettingsView: View {
         
         self.backupDocument = BackupDocument(data: backup)
         self.showFileExporter = true
+    }
+
+    func prepareCompletedLiftsExport() {
+        guard CompletedLiftsCSVDocument.hasCompletedLifts(in: workoutManager.history) else {
+            alertMessage = "There are no completed lifts in your history to export yet."
+            showAlert = true
+            return
+        }
+
+        completedLiftsDocument = CompletedLiftsCSVDocument(history: workoutManager.history)
+        showCSVExporter = true
     }
     
     func importBackup(from url: URL) {

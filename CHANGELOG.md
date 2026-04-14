@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## 2.8 - 2026-04-14
+
+### Added
+- History settings can now export completed lifts to CSV, including reps and weight for each logged set.
+
 ## 2.7 - 2026-03-02
 
 ### Fixed
