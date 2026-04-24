@@ -27,6 +27,7 @@ struct ExerciseDetailView: View {
     @State private var pendingSetIndex: Int?
     @State private var pendingExercise: Exercise?
     @State private var isWarmupExpanded = true
+    @State private var pendingCompletionDismissWorkItem: DispatchWorkItem?
     
     // AMRAP States
     @State private var showAmrapInputAlert = false
@@ -35,6 +36,8 @@ struct ExerciseDetailView: View {
     
     // ADAPTIVE METRICS
     @ScaledMetric var warmupPadding: CGFloat = 10
+    
+    private let completionDismissDelay: TimeInterval = 2.0
     
     // Filter by name and APPLY OVERRIDES
     var exercises: [Exercise] {
@@ -109,6 +112,9 @@ struct ExerciseDetailView: View {
             if isSessionView {
                 checkMissingWeights()
             }
+        }
+        .onDisappear {
+            cancelPendingCompletionDismiss()
         }
         .toolbar {
             // MARK: - ISOLATED TOOLBAR ITEMS
@@ -299,6 +305,11 @@ struct ExerciseDetailView: View {
                                 if isSessionView {
                                     handleRepTap(exercise: exercise, index: setIndex)
                                 }
+                            },
+                            onLongPress: {
+                                if isSessionView {
+                                    handleRepLongPress(exercise: exercise, index: setIndex)
+                                }
                             }
                         )
                     }
@@ -426,9 +437,16 @@ struct ExerciseDetailView: View {
         
         updateSetLog(exercise: exercise, index: index, reps: newReps)
     }
+
+    func handleRepLongPress(exercise: Exercise, index: Int) {
+        guard getSetStatus(exercise: exercise, index: index) != nil else { return }
+        updateSetLog(exercise: exercise, index: index, reps: nil)
+    }
     
     func updateSetLog(exercise: Exercise, index: Int, reps: Int?) {
         withAnimation {
+            cancelPendingCompletionDismiss()
+            
             if var session = workoutManager.currentSession {
                 if let exIndex = session.exercises.firstIndex(where: { $0.name == exercise.name }) {
                     session.exercises[exIndex].sets.removeAll(where: { $0.setNumber == index + 1 })
@@ -460,19 +478,32 @@ struct ExerciseDetailView: View {
     }
     
     func checkCompletionAndDismiss() {
-        guard let session = workoutManager.currentSession else { return }
+        guard areAllExercisesCompleted() else { return }
         
-        let allCompleted = exercises.allSatisfy { exercise in
+        let workItem = DispatchWorkItem {
+            if areAllExercisesCompleted() {
+                dismiss()
+            }
+            pendingCompletionDismissWorkItem = nil
+        }
+        
+        pendingCompletionDismissWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + completionDismissDelay, execute: workItem)
+    }
+    
+    func areAllExercisesCompleted() -> Bool {
+        guard let session = workoutManager.currentSession else { return false }
+        
+        return exercises.allSatisfy { exercise in
             if let logged = session.exercises.first(where: { $0.name == exercise.name }) {
                 return logged.sets.count >= exercise.sets
             }
             return false
         }
-        
-        if allCompleted {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                dismiss()
-            }
-        }
+    }
+    
+    func cancelPendingCompletionDismiss() {
+        pendingCompletionDismissWorkItem?.cancel()
+        pendingCompletionDismissWorkItem = nil
     }
 }

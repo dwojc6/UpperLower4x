@@ -16,6 +16,7 @@ struct ExerciseSetRow: View {
     var showExerciseName: Bool = false
     let isSessionView: Bool
     let onTap: () -> Void
+    var onLongPress: (() -> Void)? = nil
 
     @EnvironmentObject var workoutManager: WorkoutManager
     
@@ -93,40 +94,45 @@ struct ExerciseSetRow: View {
             Spacer()
             
             if isSessionView {
-                Button(action: onTap) {
-                    ZStack {
-                        if let completedReps = completedReps {
-                            let isTargetMet = completedReps >= targetRepCount
-                            let opacity = isTargetMet ? 1.0 : 0.4
-                            
-                            Circle()
-                                .fill(Color.green.opacity(opacity))
-                                .frame(width: circleSize, height: circleSize)
-                            
-                            if reps.contains(":") {
-                                Image(systemName: "checkmark")
-                                    .font(.headline)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(isTargetMet ? .black : .white)
-                            } else {
-                                Text("\(completedReps)")
-                                    .font(.headline)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(isTargetMet ? .black : .white)
-                            }
-                                
-                        } else {
-                            Circle()
-                                .stroke(Color.gray, lineWidth: 2)
-                                .frame(width: circleSize, height: circleSize)
-                            
-                            Text(reps.components(separatedBy: CharacterSet.decimalDigits.inverted).joined())
+                ZStack {
+                    if let completedReps = completedReps {
+                        let isTargetMet = completedReps >= targetRepCount
+                        let opacity = isTargetMet ? 1.0 : 0.4
+                        
+                        Circle()
+                            .fill(Color.green.opacity(opacity))
+                            .frame(width: circleSize, height: circleSize)
+                        
+                        if reps.contains(":") {
+                            Image(systemName: "checkmark")
                                 .font(.headline)
                                 .fontWeight(.bold)
-                                .foregroundColor(.gray)
+                                .foregroundColor(isTargetMet ? .black : .white)
+                        } else {
+                            Text("\(completedReps)")
+                                .font(.headline)
+                                .fontWeight(.bold)
+                                .foregroundColor(isTargetMet ? .black : .white)
                         }
+                            
+                    } else {
+                        Circle()
+                            .stroke(Color.gray, lineWidth: 2)
+                            .frame(width: circleSize, height: circleSize)
+                        
+                        Text(reps.components(separatedBy: CharacterSet.decimalDigits.inverted).joined())
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(.gray)
                     }
                 }
+                .frame(width: circleSize, height: circleSize)
+                .contentShape(Circle())
+                .onTapGesture(perform: onTap)
+                .onLongPressGesture {
+                    onLongPress?()
+                }
+                .accessibilityAddTraits(.isButton)
             }
         }
         .padding(rowPadding)

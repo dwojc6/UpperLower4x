@@ -13,25 +13,31 @@ import UIKit
 struct BackupDocument: FileDocument {
     nonisolated(unsafe) static var readableContentTypes: [UTType] { [.json] }
     
-    var data: BackupData
+    private let fileData: Data
     
-    init(data: BackupData) {
-        self.data = data
+    var exportedData: Data {
+        fileData
+    }
+    
+    init(backupData: BackupData) throws {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        self.fileData = try encoder.encode(backupData)
+    }
+    
+    init(data: Data) {
+        self.fileData = data
     }
     
     init(configuration: ReadConfiguration) throws {
-        let decoder = JSONDecoder()
         guard let data = configuration.file.regularFileContents else {
             throw CocoaError(.fileReadCorruptFile)
         }
-        self.data = try decoder.decode(BackupData.self, from: data)
+        self.fileData = data
     }
     
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = .prettyPrinted
-        let data = try encoder.encode(self.data)
-        return FileWrapper(regularFileWithContents: data)
+        FileWrapper(regularFileWithContents: fileData)
     }
 }
 
@@ -168,14 +174,13 @@ struct SettingsView: View {
     @AppStorage("deadliftMax") var deadliftMax: Double = 0.0
     @AppStorage("hasOnboarded") var hasOnboarded: Bool = false
     
-    @State private var showFileExporter = false
-    @State private var showCSVExporter = false
     @State private var showFileImporter = false
-    @State private var backupDocument: BackupDocument?
-    @State private var completedLiftsDocument: CompletedLiftsCSVDocument?
+    @State private var exportFile: ExportFile?
     @State private var alertMessage = ""
     @State private var showAlert = false
     @State private var isImporting = false
+    @State private var exportStatusMessage: String?
+    @State private var exportStatusDismissWorkItem: DispatchWorkItem?
 
     var appVersionText: String {
         let info = Bundle.main.infoDictionary
@@ -235,42 +240,49 @@ struct SettingsView: View {
                     .listRowBackground(Color.clear)
                 }
                 .scrollContentBackground(.hidden)
+                
+                if let exportStatusMessage {
+                    VStack {
+                        Spacer()
+                        
+                        Text(exportStatusMessage)
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.black)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(Color.green)
+                            .clipShape(Capsule())
+                            .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
+                            .padding(.bottom, 24)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .allowsHitTesting(false)
+                }
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
+            .animation(.easeInOut(duration: 0.2), value: exportStatusMessage != nil)
+            .onDisappear {
+                exportStatusDismissWorkItem?.cancel()
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
                 }
             }
-            // EXPORT HANDLER
-            .fileExporter(
-                isPresented: $showFileExporter,
-                document: backupDocument,
-                contentType: .json,
-                defaultFilename: "UpperLower_Backup_\(Date().formatted(date: .numeric, time: .omitted).replacingOccurrences(of: "/", with: "-"))"
-            ) { result in
-                switch result {
-                case .success(let url):
-                    print("Saved to \(url)")
-                case .failure(let error):
-                    alertMessage = "Export failed: \(error.localizedDescription)"
-                    showAlert = true
-                }
-            }
-            .fileExporter(
-                isPresented: $showCSVExporter,
-                document: completedLiftsDocument,
-                contentType: UTType(filenameExtension: "csv") ?? .plainText,
-                defaultFilename: "UpperLower_CompletedLifts_\(Date().formatted(date: .numeric, time: .omitted).replacingOccurrences(of: "/", with: "-"))"
-            ) { result in
-                switch result {
-                case .success(let url):
-                    print("Saved CSV to \(url)")
-                case .failure(let error):
-                    alertMessage = "CSV export failed: \(error.localizedDescription)"
-                    showAlert = true
-                }
+            .sheet(item: $exportFile) { export in
+                ExportDocumentPicker(
+                    fileURL: export.url,
+                    onComplete: { savedURL in
+                        cleanupTemporaryExportFile(at: export.url)
+                        exportFile = nil
+                        if savedURL != nil {
+                            showExportStatus("\(export.successLabel) exported")
+                        }
+                    }
+                )
             }
             // IMPORT HANDLER
             .sheet(isPresented: $showFileImporter) {
@@ -313,9 +325,18 @@ struct SettingsView: View {
             deadliftMax: deadliftMax,
             hasOnboarded: hasOnboarded
         )
-        
-        self.backupDocument = BackupDocument(data: backup)
-        self.showFileExporter = true
+
+        do {
+            let document = try BackupDocument(backupData: backup)
+            try presentExport(
+                data: document.exportedData,
+                filename: exportFilename(prefix: "UpperLower_Backup", fileExtension: "json"),
+                successLabel: "Backup"
+            )
+        } catch {
+            alertMessage = "Could not prepare backup export: \(error.localizedDescription)"
+            showAlert = true
+        }
     }
 
     func prepareCompletedLiftsExport() {
@@ -325,8 +346,18 @@ struct SettingsView: View {
             return
         }
 
-        completedLiftsDocument = CompletedLiftsCSVDocument(history: workoutManager.history)
-        showCSVExporter = true
+        let document = CompletedLiftsCSVDocument(history: workoutManager.history)
+
+        do {
+            try presentExport(
+                data: Data(document.csvText.utf8),
+                filename: exportFilename(prefix: "UpperLower_CompletedLifts", fileExtension: "csv"),
+                successLabel: "Completed lifts"
+            )
+        } catch {
+            alertMessage = "Could not prepare CSV export: \(error.localizedDescription)"
+            showAlert = true
+        }
     }
     
     func importBackup(from url: URL) {
@@ -436,9 +467,52 @@ struct SettingsView: View {
         alertMessage = "Import successful! All data has been restored."
         showAlert = true
     }
+    
+    func presentExport(data: Data, filename: String, successLabel: String) throws {
+        let exportsDirectory = FileManager.default.temporaryDirectory.appendingPathComponent("UpperLowerExports", isDirectory: true)
+        try FileManager.default.createDirectory(at: exportsDirectory, withIntermediateDirectories: true)
+        
+        let fileURL = exportsDirectory.appendingPathComponent(filename)
+        if FileManager.default.fileExists(atPath: fileURL.path) {
+            try FileManager.default.removeItem(at: fileURL)
+        }
+        
+        try data.write(to: fileURL, options: .atomic)
+        exportFile = ExportFile(url: fileURL, successLabel: successLabel)
+    }
+    
+    func cleanupTemporaryExportFile(at url: URL) {
+        try? FileManager.default.removeItem(at: url)
+    }
+    
+    func exportFilename(prefix: String, fileExtension: String) -> String {
+        let dateString = Date().formatted(date: .numeric, time: .omitted).replacingOccurrences(of: "/", with: "-")
+        return "\(prefix)_\(dateString).\(fileExtension)"
+    }
+    
+    func showExportStatus(_ message: String) {
+        exportStatusDismissWorkItem?.cancel()
+        exportStatusMessage = message
+        
+        let workItem = DispatchWorkItem {
+            withAnimation {
+                exportStatusMessage = nil
+            }
+            exportStatusDismissWorkItem = nil
+        }
+        
+        exportStatusDismissWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: workItem)
+    }
 }
 
 // MARK: - Native Document Picker Wrapper
+struct ExportFile: Identifiable {
+    let id = UUID()
+    let url: URL
+    let successLabel: String
+}
+
 struct DocumentPicker: UIViewControllerRepresentable {
     var onPick: (URL) -> Void
     var onError: (Error) -> Void
@@ -470,6 +544,40 @@ struct DocumentPicker: UIViewControllerRepresentable {
         
         func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
             // No action needed
+        }
+    }
+}
+
+struct ExportDocumentPicker: UIViewControllerRepresentable {
+    let fileURL: URL
+    var onComplete: (URL?) -> Void
+    
+    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
+        let picker = UIDocumentPickerViewController(forExporting: [fileURL], asCopy: true)
+        picker.delegate = context.coordinator
+        picker.shouldShowFileExtensions = true
+        return picker
+    }
+    
+    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, UIDocumentPickerDelegate {
+        let parent: ExportDocumentPicker
+        
+        init(_ parent: ExportDocumentPicker) {
+            self.parent = parent
+        }
+        
+        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+            parent.onComplete(urls.first)
+        }
+        
+        func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+            parent.onComplete(nil)
         }
     }
 }

@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## 2.9 - 2026-04-24
+
+### Added
+- Session set circles now support long press to clear logged reps immediately.
+- Settings now shows a brief in-page confirmation after exports instead of a separate success alert.
+
+### Changed
+- Finishing the last set now waits briefly before returning to the workout exercise list so reps can be adjusted.
+- Backup and completed-lifts exports now use the native iOS export picker for a more reliable save flow.
+
 ## 2.8 - 2026-04-14
 
 ### Added
