@@ -4,13 +4,14 @@ A SwiftUI iOS workout app that guides users through a 9‑week Upper/Lower progr
 
 ## Highlights
 - **9‑week program** with 4 training days per week.
-- **Session tracking** with timer, rest timer, and warm‑ups.
+- **Session tracking** with timer, rest timer, warm‑ups, and quick set adjustments.
 - **Automatic weight targets** for %1RM lifts with rounding to the nearest 5.
 - **Exercise customization**: add/remove exercises, reorder, create supersets, edit reps and notes.
 - **Equipment system**: Barbell, Machine, Plate Loaded, Cable, Kettlebell, Dumbbell, Body Weight.
 - **Barbell base weight** options for barbell exercises (45/25/15 lbs).
 - **History & calendar** to review previous workouts.
-- **Backup & restore** to JSON from Settings.
+- **Backup & restore** to JSON from Settings using the native iOS export/import flow.
+- **CSV export** for completed lifts from History settings.
 - **Progression**: accessory lifts can increase when targets are met.
 
 ## Screens/UX Overview
@@ -20,9 +21,9 @@ A SwiftUI iOS workout app that guides users through a 9‑week Upper/Lower progr
 - **History tab**: calendar and session detail editing.
 
 ## Requirements
-- Xcode 15+ (recommended)
-- iOS 17+ (recommended)
-- Swift 5.9+
+- Xcode 17+ (recommended)
+- iOS 18+
+- Swift 5.10+
 
 ## Getting Started
 1. Open the project in Xcode:
@@ -65,8 +66,9 @@ The app persists state locally using **UserDefaults**, including:
 - Hidden exercises
 
 ### Backup / Restore
-- Export from **Settings → Export Backup** (JSON file).
+- Export from **Settings → Export Backup** (JSON file via the native iOS export picker).
 - Import from **Settings → Import Backup**.
+- Export completed lifts from **Settings → Export Completed Lifts** (CSV file).
 
 ## Program Logic
 - **Weeks 1–9** are defined in `ProgramData`.
@@ -89,8 +91,13 @@ When set to **Barbell**, a “Barbell Weight” option is available (45/25/15 lb
 
 ## Customization
 - **Reps and notes** can be edited per exercise.
+- **Logged sets** can be cleared with a long press on the set circle.
 - **Equipment** can be changed per exercise.
 - **Exercises** can be added, removed, reordered, and grouped into supersets.
+
+## Session UX
+- Completing the final set waits briefly before returning to the workout exercise list.
+- That short delay gives users time to adjust the last logged set if needed.
 
 ## Development Notes
 - UI is SwiftUI with `@EnvironmentObject` shared state.
@@ -100,7 +107,6 @@ When set to **Barbell**, a “Barbell Weight” option is available (45/25/15 lb
 ## Roadmap Ideas
 - Cloud sync
 - Unit/UI tests
-- Export to CSV
 - Dynamic program builder
 
 ## License
